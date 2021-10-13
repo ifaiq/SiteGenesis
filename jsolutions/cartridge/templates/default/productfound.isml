@@ -1,0 +1,4 @@
+<!--- TEMPLATENAME: productfound.isml --->
+test
+${pdict.myProduct.name}
+

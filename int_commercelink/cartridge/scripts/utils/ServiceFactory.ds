@@ -1,0 +1,58 @@
+/**
+*	Name: ServiceFactory
+*	Description:
+*		This script creates a factory object that stores all CommerceLink constants, utility helper functions to get or
+*	pivot off of site preferences based on values, as well as build the requestDataContainer Objects for all the CommerceLink services
+*	If the requestDataContainer methods get excessive than they may be broken into smaller files, leaving this factory file
+*	with core functionality to CommerceLink
+*/
+var ServiceRegistry = require('dw/svc/ServiceRegistry');
+var CommerceLinkFactory = require('~/cartridge/scripts/utils/CommerceLinkFactory');
+
+
+var __ServiceFactory : Object = {
+	//Returns Prefred Service
+	getPreferedService: function (args) {
+		return __ServiceFactory.setServiceConfigs(args);
+	},
+	// Sets Service Configurations
+	setServiceConfigs: function (args) {
+		//Get Feature Configurations
+		if(args.property) {
+			var property = CommerceLinkFactory.CONFIGURATIONS[args.feature];
+			var configs = property[args.property];
+		}
+		else {
+			var configs = CommerceLinkFactory.CONFIGURATIONS[args.feature];
+		}
+		
+		// get the service
+		var service = ServiceRegistry.get(args.identifier);
+		
+		//Set Service Request Method
+		service.setRequestMethod(configs.TYPE);
+		
+		//Create Service Endpoint
+		var endpoint = service.getURL() + "/" + configs.RESOURCE + "/" + configs.ACTION;
+		
+		//Set params for param based service
+		if(args.isParamBased) {
+			var params = args.params;
+			for (var name in params) {
+				endpoint = CommerceLinkFactory.appendParamToURL(endpoint, name, params[name]);
+		    }
+		}
+		
+		//Setting Endpoint in Service
+		service.setURL(endpoint);
+		
+		//Set Service Header
+		service.addHeader("Content-Type", "application/json");
+		service.addHeader("Accept", "application/json");
+		service.addHeader("x-api-key", CommerceLinkFactory.Preferences["cl-x-api-key"]);
+		
+		return service;
+	}
+}
+// maybe just exports
+module.exports=__ServiceFactory;

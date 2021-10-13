@@ -1,0 +1,268 @@
+/**
+*	Name: WishlistFactory
+*	Description:
+*		This script creates a factory object builds the requestDataContainer Objects for all the radial Wishlist Create service calls
+*/
+var dwsvc		= require ("dw/svc");
+var dwwishlist	= require ("dw/wishlist");
+var dwnet		= require ("dw/net");
+var dwsystem	= require ("dw/system");
+var dwvalue		= require ("dw/value");
+var dwutil		= require ("dw/util");
+
+var CommerceLinkFactory = require ("~/cartridge/scripts/utils/CommerceLink");
+
+var __WishlistFactory : Object = {
+	// Public Methods
+	
+	/**
+	* Builds JSON request packet for creating new Wishlist
+	*/
+	buildCreateWishlistRequestObject : function(args) {
+		var wishlistObj = args.wishlist;
+		var WISHLIST_OBJECT = new Object();
+		WISHLIST_OBJECT.Id						= wishlistObj.Id;
+		WISHLIST_OBJECT.Name					= wishlistObj.Name;
+		WISHLIST_OBJECT.CustomerId				= wishlistObj.CustomerId;
+		WISHLIST_OBJECT.IsFavorite				= wishlistObj.IsFavorite;
+		WISHLIST_OBJECT.IsRecurring				= wishlistObj.IsRecurring;
+		WISHLIST_OBJECT.IsPrivate				= wishlistObj.IsPrivate;
+		WISHLIST_OBJECT.CommerceListTypeValue	= wishlistObj.CommerceListTypeValue;
+		WISHLIST_OBJECT.CommerceListType		= new Object();
+		
+		// Wishlist CommerceListLines
+		WISHLIST_OBJECT.CommerceListLines		= new Array();
+		var wishlistCommerceListLines			= new Array();
+	    var wishlistCommerceListLine;
+	    if(!empty(wishlistObj.CommerceListLines)) {
+	    	for (var i = 0; i < wishlistObj.CommerceListLines.length; i++) {
+	    		wishlistCommerceListLine = wishlistObj.CommerceListLines[i];
+	    		var wishlistCommerceListLineObj = {
+					"CommerceListId"	:	wishlistCommerceListLine.CommerceListId,
+					"LineId"			:	wishlistCommerceListLine.LineId,
+					"CustomerId"		:	wishlistCommerceListLine.CustomerId,
+					"ProductId"			:	wishlistCommerceListLine.ProductId,
+					"Quantity"			:	wishlistCommerceListLine.Quantity,
+					"UnitOfMeasure"		:	wishlistCommerceListLine.UnitOfMeasure,
+					"IsFavorite"		:	wishlistCommerceListLine.IsFavorite,
+					"IsRecurring"		:	wishlistCommerceListLine.IsRecurring,
+					"IsPrivate"			:	wishlistCommerceListLine.IsPrivate,
+					"EntityName"		:	wishlistCommerceListLine.EntityName,
+					"ExtensionData"		:	wishlistCommerceListLine.ExtensionData, // object
+					"ExtensionProperties":	new Array()
+			    };
+			    var wishlist_CommerceListLines_ExtensionProperty = new Object();
+			    if(!empty(wishlistObj.CommerceListLines.ExtensionProperties)) {
+			    	for (var j = 0; j < wishlistObj.CommerceListLines.ExtensionProperties.length; j++) {
+			    		wishlist_CommerceListLines_ExtensionProperty = wishlistObj.CommerceListLines.ExtensionProperties[j];
+			    		var ExtensionPropertyObj = {
+			    			"Key"	:	wishlist_CommerceListLines_ExtensionProperty.Key,
+			    			"Value"	:	new Object()
+			    		}
+			    		ExtensionPropertyObj.Value = wishlist_CommerceListLines_ExtensionProperty.Value; // Value object have multiple attributes
+			    		/*ExtensionPropertyObj.Value.BooleanValue			= wishlist_CommerceListLines_ExtensionProperty.Value.BooleanValue;
+			    		ExtensionPropertyObj.Value.ByteValue			= wishlist_CommerceListLines_ExtensionProperty.Value.ByteValue;
+			    		ExtensionPropertyObj.Value.DecimalValue			= wishlist_CommerceListLines_ExtensionProperty.Value.DecimalValue;
+			    		ExtensionPropertyObj.Value.DateTimeOffsetValue	= wishlist_CommerceListLines_ExtensionProperty.Value.DateTimeOffsetValue;
+			    		ExtensionPropertyObj.Value.IntegerValue			= wishlist_CommerceListLines_ExtensionProperty.Value.IntegerValue;
+			    		ExtensionPropertyObj.Value.LongValue			= wishlist_CommerceListLines_ExtensionProperty.Value.LongValue;
+			    		ExtensionPropertyObj.Value.StringValue			= wishlist_CommerceListLines_ExtensionProperty.Value.StringValue;
+			    		*/
+			    		wishlistCommerceListLineObj.ExtensionProperties.push(ExtensionPropertyObj);
+			    	}
+			    }
+			    wishlistCommerceListLineObj.Item = new Object();
+			    wishlistCommerceListLineObj.Item = wishlistCommerceListLine.Item;
+			    wishlistCommerceListLineObj.ItemId = wishlistCommerceListLine.ItemId;
+			    
+			    WISHLIST_OBJECT.CommerceListLines.push(wishlistCommerceListLineObj);
+	    	}
+	    }
+		WISHLIST_OBJECT.EntityName = wishlistObj.EntityName;
+		WISHLIST_OBJECT.ExtensionData = new Object();
+		WISHLIST_OBJECT.ExtensionData = wishlistObj.ExtensionData;
+		WISHLIST_OBJECT.ExtensionProperties = new Array();
+		var wishlist_ExtensionProperty = new Object();
+	    if(!empty(wishlistObj.ExtensionProperties)) {
+	    	for (var k = 0; k < wishlistObj.ExtensionProperties.length; k++) {
+	    		wishlist_ExtensionProperty = wishlistObj.ExtensionProperties[k];
+	    		var ExtensionPropertyObj2 = {
+	    			"Key"	:	wishlist_ExtensionProperty.Key,
+	    			"Value"	:	new Object()
+	    		}
+				ExtensionPropertyObj2.Value = wishlist_ExtensionProperty.Value; // Value object have multiple attributes
+	    		/*ExtensionPropertyObj2.Value.BooleanValue		= wishlist_ExtensionProperty.Value.BooleanValue;
+	    		ExtensionPropertyObj2.Value.ByteValue			= wishlist_ExtensionProperty.Value.ByteValue;
+	    		ExtensionPropertyObj2.Value.DecimalValue		= wishlist_ExtensionProperty.Value.DecimalValue;
+	    		ExtensionPropertyObj2.Value.DateTimeOffsetValue	= wishlist_ExtensionProperty.Value.DateTimeOffsetValue;
+	    		ExtensionPropertyObj2.Value.IntegerValue		= wishlist_ExtensionProperty.Value.IntegerValue;
+	    		ExtensionPropertyObj2.Value.LongValue			= wishlist_ExtensionProperty.Value.LongValue;
+	    		ExtensionPropertyObj2.Value.StringValue			= wishlist_ExtensionProperty.Value.StringValue;
+	    		*/
+	    		WISHLIST_OBJECT.ExtensionProperties.push(ExtensionPropertyObj2);
+	    	}
+	    }
+	    	    
+	    WISHLIST_OBJECT.Item = new Object();
+	    WISHLIST_OBJECT.Item = wishlistObj.Item;
+	    WISHLIST_OBJECT.DueDateTime = wishlistObj.DueDateTime;
+		
+		//Creating JSON Object
+		var requestObject = JSON.stringify(WISHLIST_OBJECT);
+		
+		return requestObject;
+	},
+
+	/**
+	* Builds JSON request packet for creating new Wishlist Line
+	*/
+	buildCreateWishlistLineRequestObject : function(args) {
+		var wishlistLineObj = args.wishlistLine;
+		var WISHLIST_COMMERCE_LIST_LINE_OBJECT = new Object();
+		
+		var WISHLIST_COMMERCE_LIST_LINE_OBJECT = {
+			"CommerceListId"	:	wishlistLineObj.CommerceListId,
+			"LineId"			:	wishlistLineObj.LineId,
+			"CustomerId"		:	wishlistLineObj.CustomerId,
+			"ProductId"			:	wishlistLineObj.ProductId,
+			"Quantity"			:	wishlistLineObj.Quantity,
+			"UnitOfMeasure"		:	wishlistLineObj.UnitOfMeasure,
+			"IsFavorite"		:	wishlistLineObj.IsFavorite,
+			"IsRecurring"		:	wishlistLineObj.IsRecurring,
+			"IsPrivate"			:	wishlistLineObj.IsPrivate,
+			"EntityName"		:	wishlistLineObj.EntityName,
+			"ExtensionData"		:	wishlistLineObj.ExtensionData, // object
+			"ExtensionProperties":	new Array()
+	    };
+	    var wishlist_CommerceListLines_ExtensionProperty = new Object();
+	    if(!empty(wishlistLineObj.ExtensionProperties)) {
+	    	for (var j = 0; j < wishlistLineObj.ExtensionProperties.length; j++) {
+	    		wishlist_CommerceListLines_ExtensionProperty = wishlistLineObj.ExtensionProperties[j];
+	    		var ExtensionPropertyObj = {
+	    			"Key"	:	wishlist_CommerceListLines_ExtensionProperty.Key,
+	    			"Value"	:	new Object()
+	    		}
+	    		ExtensionPropertyObj.Value = wishlist_CommerceListLines_ExtensionProperty.Value; // Value object have multiple attributes
+	    		/*ExtensionPropertyObj.Value.BooleanValue			= wishlist_CommerceListLines_ExtensionProperty.Value.BooleanValue;
+	    		ExtensionPropertyObj.Value.ByteValue			= wishlist_CommerceListLines_ExtensionProperty.Value.ByteValue;
+	    		ExtensionPropertyObj.Value.DecimalValue			= wishlist_CommerceListLines_ExtensionProperty.Value.DecimalValue;
+	    		ExtensionPropertyObj.Value.DateTimeOffsetValue	= wishlist_CommerceListLines_ExtensionProperty.Value.DateTimeOffsetValue;
+	    		ExtensionPropertyObj.Value.IntegerValue			= wishlist_CommerceListLines_ExtensionProperty.Value.IntegerValue;
+	    		ExtensionPropertyObj.Value.LongValue			= wishlist_CommerceListLines_ExtensionProperty.Value.LongValue;
+	    		ExtensionPropertyObj.Value.StringValue			= wishlist_CommerceListLines_ExtensionProperty.Value.StringValue;
+	    		*/
+	    		WISHLIST_COMMERCE_LIST_LINE_OBJECT.ExtensionProperties.push(ExtensionPropertyObj);
+	    	}
+	    }
+	    WISHLIST_COMMERCE_LIST_LINE_OBJECT.Item = new Object();
+	    WISHLIST_COMMERCE_LIST_LINE_OBJECT.Item = wishlistLineObj.Item;
+	    WISHLIST_COMMERCE_LIST_LINE_OBJECT.ItemId = wishlistLineObj.ItemId;
+	
+	    //Creating JSON Object
+		var requestObject = JSON.stringify(WISHLIST_COMMERCE_LIST_LINE_OBJECT);
+		
+		return requestObject;
+	},
+	
+	/*
+	* Builds JSON request packet for getting Wishlist from AX
+	*/
+	buildGetWishlistRequestObject : function(args) {
+		var WISHLIST_OBJECT = {
+			wishListId		: args.wishListId,
+			customerId		: args.customerId,
+			favoriteFilter	: args.favoriteFilter,
+			publicFilter	: args.publicFilter
+		};
+
+		//Creating JSON Object
+		var requestObject = JSON.stringify(WISHLIST_OBJECT);
+		
+		return requestObject;
+	},
+	
+	/**
+	* Builds JSON request packet for Updating Wishlist Line
+	*/
+	buildUpdateWishlistLineRequestObject : function(args) {
+		var wishlistLineObj = args.wishlistLine;
+		var WISHLIST_COMMERCE_LIST_LINE_OBJECT = new Object();
+		
+		var WISHLIST_COMMERCE_LIST_LINE_OBJECT = {
+			"CommerceListId"	:	wishlistLineObj.CommerceListId,
+			"LineId"			:	wishlistLineObj.LineId,
+			"CustomerId"		:	wishlistLineObj.CustomerId,
+			"ProductId"			:	wishlistLineObj.ProductId,
+			"Quantity"			:	wishlistLineObj.Quantity,
+			"UnitOfMeasure"		:	wishlistLineObj.UnitOfMeasure,
+			"IsFavorite"		:	wishlistLineObj.IsFavorite,
+			"IsRecurring"		:	wishlistLineObj.IsRecurring,
+			"IsPrivate"			:	wishlistLineObj.IsPrivate,
+			"EntityName"		:	wishlistLineObj.EntityName,
+			"ExtensionData"		:	wishlistLineObj.ExtensionData, // object
+			"ExtensionProperties":	new Array()
+	    };
+	    var wishlist_CommerceListLines_ExtensionProperty = new Object();
+	    if(!empty(wishlistLineObj.ExtensionProperties)) {
+	    	for (var j = 0; j < wishlistLineObj.ExtensionProperties.length; j++) {
+	    		wishlist_CommerceListLines_ExtensionProperty = wishlistLineObj.ExtensionProperties[j];
+	    		var ExtensionPropertyObj = {
+	    			"Key"	:	wishlist_CommerceListLines_ExtensionProperty.Key,
+	    			"Value"	:	new Object()
+	    		}
+	    		ExtensionPropertyObj.Value = wishlist_CommerceListLines_ExtensionProperty.Value; // Value object have multiple attributes
+	    		/*ExtensionPropertyObj.Value.BooleanValue			= wishlist_CommerceListLines_ExtensionProperty.Value.BooleanValue;
+	    		ExtensionPropertyObj.Value.ByteValue			= wishlist_CommerceListLines_ExtensionProperty.Value.ByteValue;
+	    		ExtensionPropertyObj.Value.DecimalValue			= wishlist_CommerceListLines_ExtensionProperty.Value.DecimalValue;
+	    		ExtensionPropertyObj.Value.DateTimeOffsetValue	= wishlist_CommerceListLines_ExtensionProperty.Value.DateTimeOffsetValue;
+	    		ExtensionPropertyObj.Value.IntegerValue			= wishlist_CommerceListLines_ExtensionProperty.Value.IntegerValue;
+	    		ExtensionPropertyObj.Value.LongValue			= wishlist_CommerceListLines_ExtensionProperty.Value.LongValue;
+	    		ExtensionPropertyObj.Value.StringValue			= wishlist_CommerceListLines_ExtensionProperty.Value.StringValue;
+	    		*/
+	    		WISHLIST_COMMERCE_LIST_LINE_OBJECT.ExtensionProperties.push(ExtensionPropertyObj);
+	    	}
+	    }
+	    WISHLIST_COMMERCE_LIST_LINE_OBJECT.Item = new Object();
+	    WISHLIST_COMMERCE_LIST_LINE_OBJECT.Item = wishlistLineObj.Item;
+	    WISHLIST_COMMERCE_LIST_LINE_OBJECT.ItemId = wishlistLineObj.ItemId;
+	
+	    //Creating JSON Object
+		var requestObject = JSON.stringify(WISHLIST_COMMERCE_LIST_LINE_OBJECT);
+		
+		return requestObject;
+	},
+	
+	/*
+	* Builds JSON request packet for deleting Wishlist from AX
+	*/
+	buildDeleteWishlistRequestObject : function(args) {
+		var WISHLIST_OBJECT = {
+			wishListId		: args.wishListId,
+			customerId		: args.customerId
+		};
+
+		//Creating JSON Object
+		var requestObject = JSON.stringify(WISHLIST_OBJECT);
+		
+		return requestObject;
+	},
+	
+	/*
+	* Builds JSON request packet for deleting Wishlist line from AX
+	*/
+	buildDeleteWishlistLineRequestObject : function(args) {
+		var WISHLIST_OBJECT = {
+			wishListLineId		: args.wishListLineId,
+			wishListId			: args.wishListId,
+			filterAccountNumber	: args.filterAccountNumber
+		};
+
+		//Creating JSON Object
+		var requestObject = JSON.stringify(WISHLIST_OBJECT);
+		
+		return requestObject;
+	}
+	
+}
+
+module.exports=__WishlistFactory;

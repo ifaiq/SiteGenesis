@@ -1,0 +1,107 @@
+/**
+*	Name: CustomerFactory
+*	Description:
+*		This script creates a factory object builds the requestDataContainer Objects for all the radial Order Create service calls
+*/
+var dwsvc		= require ("dw/svc");
+var dworder		= require ("dw/order");
+var dwnet		= require ("dw/net");
+var dwsystem	= require ("dw/system");
+var dwvalue		= require ("dw/value");
+var dwutil		= require ("dw/util");
+
+var CommerceLinkFactory = require ("~/cartridge/scripts/utils/CommerceLinkFactory");
+
+var __GiftCardFactory : Object = {	
+	// Public Methods
+	
+	/*
+	* Builds JSON request packet for Creating/Issuing a new GiftCard
+	*/
+	buildIssueGiftCardRequestObject : function(args) {
+		var giftcardObj = args.giftCard;
+		var GIFT_CARD_OBJECT = {
+		  "giftCardId"		: giftcardObj.giftCertificateCode,
+		  "amount"			: giftcardObj.amount.value,
+		  "currencyCode"	: giftcardObj.amount.currencyCode,
+		  "transactionId"	: __GiftCardFactory.getTransactionID()
+		}
+
+		//Creating JSON Object
+		var requestObject = JSON.stringify(GIFT_CARD_OBJECT);
+		
+		return requestObject;
+	},
+	
+	/*
+	* Builds JSON request packet for Unlocking existing GiftCard in AX
+	*/
+	buildUnlockGiftCardRequestObject : function(args) {
+		//http://40.79.65.232:6321/api/v1/giftcard/UnlockGiftCard?giftCardId=GC1001001199
+		var GIFT_CARD_OBJECT = {
+			giftCardId : args.giftCardId
+		};
+			
+		//Creating JSON Object
+		var requestObject = JSON.stringify(GIFT_CARD_OBJECT);
+		
+		return requestObject;
+	},
+	
+	/*
+	* Builds JSON request packet for Locking existing GiftCard in AX
+	*/
+	buildLockGiftCardRequestObject : function(args) {
+		//http://40.79.65.232:6321/api/v1/giftcard/LockGiftCard?giftCardId=GC1001001199
+		var GIFT_CARD_OBJECT = {
+			giftCardId : args.giftCardId
+		};
+			
+		//Creating JSON Object
+		var requestObject = JSON.stringify(GIFT_CARD_OBJECT);
+		
+		return requestObject;
+	},
+
+	/*
+	* Builds JSON request packet for getting Balance of existing GiftCard from AX
+	*/
+	buildGetGiftCardBalanceRequestObject : function(args) {
+		//http://40.79.65.232:6321/api/v1/giftcard/GetGiftCardBalance?giftCardId=GC1001001121
+		var GIFT_CARD_OBJECT = {
+			giftCardId : args.giftCardId
+		};
+
+		//Creating JSON Object
+		var requestObject = JSON.stringify(GIFT_CARD_OBJECT);
+		
+		return requestObject;
+	},
+	
+	/*
+	* Builds JSON request packet for Paying existing GiftCard in AX
+	*/
+	buildPayGiftCardRequestObject : function(args) {
+		var giftcardObj = args.giftCard;
+		var GIFT_CARD_OBJECT = {
+		  "giftCardId"		: giftcardObj.giftCardId,
+		  "amount"			: giftcardObj.amount,
+		  "currencyCode"	: giftcardObj.currencyCode,
+		  "transactionId"	: giftcardObj.transactionId
+		}
+
+		//Creating JSON Object
+		var requestObject = JSON.stringify(GIFT_CARD_OBJECT);
+		
+		return requestObject;
+	},
+	getTransactionID: function() {
+		var prefix = CommerceLinkFactory.Preferences["gcTransactionIDPrefix"].value || "CL";
+		var uniqueId1 = dw.util.UUIDUtils.createUUID();
+		var uniqueId2 = dw.util.UUIDUtils.createUUID();
+		var uniqueId = prefix + "_" + uniqueId1 + uniqueId2;
+		return uniqueId.substring(0, 40);
+	}
+}
+
+module.exports=__GiftCardFactory;

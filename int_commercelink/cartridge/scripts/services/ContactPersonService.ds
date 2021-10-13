@@ -1,0 +1,79 @@
+/**
+ * Initialize HTTP Service for Commerce Link Cartridge
+ */
+importPackage( dw.svc );
+importPackage( dw.net );
+importPackage( dw.io );
+
+
+/* Local Packages Include */
+var CommerceLinkFactory = require('~/cartridge/scripts/utils/CommerceLinkFactory');
+
+/**
+*
+* HTTP Create Customer Service
+*
+*/
+ServiceRegistry.configure(CommerceLinkFactory.SERVICES.CONTACT_PERSON, {
+	/**
+	 * createRequest()
+	 *	This function used for creating and preparing request.
+	 */
+	createRequest: function(svc : HTTPService, args){
+		if(args) {
+			return args;
+		}
+		else {
+			return null;
+		}
+	},
+	/**
+	 * parseResponse()
+	 *	This function used for parsing response.
+	 */
+	parseResponse: function(svc : HTTPService, client : HTTPClient) {
+		if (client.statusCode == 200) {
+			return client.text;
+		}
+		else {
+			return {
+				statusCode		: client.statusCode,
+				statusMessage	: client.statusMessage,
+				errorText		: client.errorText,
+				responseMessage : client.text
+			};
+		}
+	},
+	/**
+	 * mockCall()
+	 *	This function used for returining mocked response when service is mocked.
+	 */
+	mockCall: function(svc : HTTPService, client : HTTPClient){
+	    return {
+			statusCode: 200,
+			statusMessage: "Success",
+			text: "MOCK RESPONSE (" + svc.URL + ")"
+		};
+	},
+	/**
+	 * filterLogMessage()
+	 *	This function filters logs messages if required.
+	 */
+	filterLogMessage: function(msg : String) {
+		return msg.replace("headers", "OFFWITHTHEHEADERS");
+	},
+	/**
+	 * getRequestLogMessage()
+	 *	This function handles how the request is logged.
+	 */
+	getRequestLogMessage : function(request : Object) : String {
+		return;
+	},
+	/**
+	 * getResponseLogMessage()
+	 	 *	This function handles how the response is logged.
+	 */
+	getResponseLogMessage : function(response : Object) : String {
+		return;
+	}
+});

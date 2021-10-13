@@ -1,0 +1,84 @@
+{
+	"hooks": [
+		{
+			"name": "commercelink.api.test.publish",
+			"script": "./hooks/chanel/ChannelPublish.js"
+		},
+		{
+			"name": "commercelink.api.order.create",
+			"script": "./hooks/order/CreateOrder.js"
+		},
+		{
+			"name": "commercelink.api.customer.create",
+			"script": "./hooks/customer/CreateCustomer.js"
+		},
+		{
+			"name": "commercelink.api.customer.get",
+			"script": "./hooks/customer/GetCustomer.js"
+		},
+		{
+			"name": "commercelink.api.customer.update",
+			"script": "./hooks/customer/UpdateCustomer.js"
+		},
+		{
+			"name": "commercelink.api.wishlist.create",
+			"script": "./hooks/wishlist/CreateWishlist.js"
+		},
+		{
+			"name": "commercelink.api.wishlist.get",
+			"script": "./hooks/wishlist/GetWishlist.js"
+		},
+		{
+			"name": "commercelink.api.wishlist.createline",
+			"script": "./hooks/wishlist/CreateWishlistLine.js"
+		},
+		{
+			"name": "commercelink.api.wishlist.updateline",
+			"script": "./hooks/wishlist/UpdateWishlistLine.js"
+		},
+		{
+			"name": "commercelink.api.giftcard.issue",
+			"script": "./hooks/giftcard/IssueGiftCard.js"
+		},
+		{
+			"name": "commercelink.api.giftcard.unlock",
+			"script": "./hooks/giftcard/UnlockGiftCard.js"
+		},
+		{
+			"name": "commercelink.api.giftcard.lock",
+			"script": "./hooks/giftcard/LockGiftCard.js"
+		},
+		{
+			"name": "commercelink.api.giftcard.balance",
+			"script": "./hooks/giftcard/GetGiftCardBalance.js"
+		},
+		{
+			"name": "commercelink.api.giftcard.pay",
+			"script": "./hooks/giftcard/PayGiftCard.js"
+		},
+		{
+			"name": "commercelink.api.quotation.create",
+			"script": "./hooks/giftcard/CreateQuotation.js"
+		},
+		{
+			"name": "commercelink.api.quotation.get",
+			"script": "./hooks/giftcard/GetQuotation.js"
+		},
+		{
+			"name": "commercelink.api.contactperson.create",
+			"script": "./hooks/giftcard/CreateContactPerson.js"
+		},
+		{
+			"name": "commercelink.api.contactperson.get",
+			"script": "./hooks/giftcard/GetContactPerson.js"
+		},
+		{
+			"name": "commercelink.api.contactperson.update",
+			"script": "./hooks/giftcard/UpdateContactPerson.js"
+		},
+		{
+			"name": "commercelink.api.store.availability",
+			"script": "./hooks/store/GetStoreAvailability.js"
+		}
+	]
+}

@@ -1,0 +1,9 @@
+<!--- TEMPLATENAME: found.isml --->
+<html>
+	<head>
+	<title>Found</title>
+	</head>
+	<body>
+		<h2>Got the parameter ${pdict.CurrentHttpParameterMap.pid.stringValue}</h2>
+	</body>
+</html>

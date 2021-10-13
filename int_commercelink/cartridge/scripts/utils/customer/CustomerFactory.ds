@@ -1,0 +1,263 @@
+/**
+*	Name: CustomerFactory
+*	Description:
+*		This script creates a factory object builds the requestDataContainer Objects for all the radial Order Create service calls
+*/
+var dwsvc		= require ("dw/svc");
+var dworder		= require ("dw/order");
+var dwcustomer	= require ("dw/customer");
+var dwnet		= require ("dw/net");
+var dwsystem	= require ("dw/system");
+var dwvalue		= require ("dw/value");
+var dwutil		= require ("dw/util");
+
+var CommerceLinkFactory = require ("~/cartridge/scripts/utils/CommerceLinkFactory");
+
+var __CustomerFactory : Object = {	
+	// Public Methods
+	
+	/**
+	* Builds JSON request packet for creating new Customer
+	*/
+	buildCreateCustomerRequestObject : function(args) {
+		var customerObj = args;
+		var CUSTOMER_OBJECT = new Object();
+		CUSTOMER_OBJECT.useMapping = false;
+		
+		//Customer Object
+		var customer = new Object();
+		customer.Phone			= customerObj.profile.phoneHome || "0123456789";
+      	customer.Email			= customerObj.profile.email;
+      	customer.Name			= customerObj.profile.firstName +" "+ customerObj.profile.lastName;
+      	customer.FirstName		= customerObj.profile.firstName;
+      	customer.MiddleName		= "";
+      	customer.LastName		= customerObj.profile.lastName;
+      	customer.VatNumber		= "";
+      	customer.Language		= "";
+      	customer.CustomerType	= "Registered";
+      	customer.IdentificationNumber	= customerObj.profile.getCustomerNo();
+		
+		//Associate customer object in main request object
+		CUSTOMER_OBJECT.customer = customer;
+		
+		//Customer Addresses
+		CUSTOMER_OBJECT.customer.Addresses = new Array();
+		
+		var addressBook = customerObj.profile.addressBook;
+		var customerAddress;
+	    if(!empty(customerObj.addressBook)) {
+	    	for (var i = 0; i < addressBook.addresses.length; i++) {
+	    		customerAddress = addressBook.addresses[i];
+	    		var addressObj = {
+			    	"Name"			: !empty(customerAddress.ID) ? customerAddress.ID: "",
+			    	"FullAddress"	: !empty(customerAddress.address1) ? customerAddress.address1: "",
+			    	"Street"		: !empty(customerAddress.address1) ? customerAddress.address1: "",
+			    	"StreetNumber"	: !empty(customerAddress.suite) ? customerAddress.suite: "",
+			    	"County"		: !empty(customerAddress.countryCode) ? customerAddress.countryCode: "",
+			    	"City"			: !empty(customerAddress.city) ? customerAddress.city: "",
+			    	"State"			: !empty(customerAddress.stateCode) ? customerAddress.stateCode: "",
+			    	"ZipCode"		: !empty(customerAddress.postalCode) ? customerAddress.postalCode: "",
+			    	"ThreeLetterISORegionName":	"NLD",
+			    	"IsPrimary"		: true
+			    };
+			    CUSTOMER_OBJECT.customer.Addresses.push(addressObj);
+	    	}
+	    }
+	    
+	    CUSTOMER_OBJECT.customer.Image					= null;
+        CUSTOMER_OBJECT.customer.EntityName				= null;
+        CUSTOMER_OBJECT.customer.ExtensionData			= null;
+        CUSTOMER_OBJECT.customer.ExtensionProperties	= new Array();
+        CUSTOMER_OBJECT.customer.Item					= null;
+        CUSTOMER_OBJECT.customer.EcomCustomerId			= customerObj.profile.getCustomerNo();
+        CUSTOMER_OBJECT.customer.SLBirthMonth			= null;
+        CUSTOMER_OBJECT.customer.CustomerAddresses		= null;
+        CUSTOMER_OBJECT.customer.IsAsyncCustomer		= false;
+        		
+		//Creating JSON Object
+		var requestObject = JSON.stringify(CUSTOMER_OBJECT);
+		
+		return requestObject;
+	},
+	
+	/**
+	* Builds JSON request packet for geting Customer from AX
+	*/
+	buildGetCustomerRequestObject : function(args) {
+		var CUSTOMER_OBJECT = new Object();
+		CUSTOMER_OBJECT.useMapping = false;
+		CUSTOMER_OBJECT.searchLocation = 1;
+		CUSTOMER_OBJECT.customerId = args.customerId;
+		
+		//Creating JSON Object
+		var requestObject = JSON.stringify(CUSTOMER_OBJECT);
+		
+		return requestObject;
+	},
+	
+	/**
+	* Builds JSON request packet for updating existing Customer in AX
+	*/
+	buildUpdateCustomerRequestObject : function(args) {
+		var customerObj = args;
+		var CUSTOMER_OBJECT = new Object();
+		CUSTOMER_OBJECT.useMapping = false;
+		
+		//Customer Object
+		var customer = {
+			"AccountNumber"						: customerObj.profile.custom.customerId,
+			"RecordId"							: new Number(customerObj.profile.custom.recordID),
+			"CreatedDateTime"					: "",
+			"ChargeGroup"						: "",
+			"PriceGroup"						: "",
+			"IsCustomerTaxInclusive"			: false,
+			"Phone"								: customerObj.profile.phoneHome || "0123456789",
+			"PhoneRecordId"						: "",
+			"PhoneExt"							: "",
+			"Cellphone"							: "",
+			"Email"								: customerObj.profile.email,
+			"EmailRecordId"						: "",
+			"Url"								: "",
+			"UrlRecordId"						: 0,
+			"Name"								: customerObj.profile.firstName +" "+ customerObj.profile.lastName,
+			"PersonNameId"						: "",
+			"FirstName"							: customerObj.profile.firstName,
+			"MiddleName"						: "",
+			"LastName"							: customerObj.profile.lastName,
+			"DirectoryPartyRecordId"			: "",
+			"PartyNumber"						: "",
+			"CustomerType"						: 0,
+			"CustomerTypeValue"					: 1,
+			"Language"							: "en-us",
+			"TaxGroup"							: "NJ",
+			"CustomerGroup"						: "Default",
+			"CurrencyCode"						: "",
+			"CNPJCPFNumber"						: "",
+			"IdentificationNumber"				: "",
+			"InvoiceAccount"					: "",
+			"MandatoryCreditLimit"				: false,
+			"CreditRating"						: "",
+			"CreditLimit"						: 0,
+			"Balance"							: 0,
+			"Blocked"							: false,
+			"UseOrderNumberReference"			: false,
+			"OrganizationId"					: "",
+			"UsePurchaseRequest"				: false,
+			"MultilineDiscountGroup"			: "",
+			"TotalDiscountGroup"				: "",
+			"LineDiscountGroup"					: "",
+			"SalesTaxGroup"						: "NJ",
+			"TaxExemptNumber"					: "",
+			"VatNumber"							: "",
+			"TaxOffice"							: "",
+			"NonChargeableAccount"				: false,
+			"Tag"								: "",
+			"ReceiptSettings"					: 0,
+			"ReceiptEmail"						: customerObj.profile.email,
+			"RetailCustomerTableRecordId"		: 0,
+			"NewCustomerPartyNumber"			: null,
+			"PhoneLogisticsLocationRecordId"	: 0,
+			"PhoneLogisticsLocationId"			: null,
+			"PhonePartyLocationRecId"			: 0,
+			"EmailLogisticsLocationRecordId"	: 0,
+			"EmailLogisticsLocationId"			: null,
+			"EmailPartyLocationRecId"			: 0,
+			"UrlLogisticsLocationRecordId"		: 0,
+			"UrlLogisticsLocationId"			: null,
+			"UrlPartyLocationRecId"				: 0,
+			"CellphoneRecordId"					: 0,
+			"CellphoneLogisticsLocationRecordId": 0,
+			"CellphoneLogisticsLocationId"		: null,
+			"CellphonePartyLocationRecId"		: 0,
+			"CustomerAffiliations"				: null,
+			"AddressBooks"						: null,
+			"Addresses"							: new Array()
+		}
+		CUSTOMER_OBJECT.Customer = customer;
+		
+		//Customer Addresses
+		var addressBook = customerObj.profile.addressBook;
+		CUSTOMER_OBJECT.Customer.Addresses = new Array();
+		var customerAddress;
+	    if(!empty(customerObj.addressBook)) {
+	    	for (var i = 0; i < addressBook.addresses.length; i++) {
+	    		customerAddress = addressBook.addresses[i];
+	    		var addressObj = {
+	    			"Name"								: !empty(customerAddress.ID) ? customerAddress.ID: "",
+			    	"FullAddress"						: !empty(customerAddress.address1) ? customerAddress.address1: "",
+			    	"Street"							: !empty(customerAddress.address1) ? customerAddress.address1: "",
+			    	"StreetNumber"						: !empty(customerAddress.suite) ? customerAddress.suite: "",
+			    	"County"							: !empty(customerAddress.countryCode) ? customerAddress.countryCode: "",
+			    	"City"								: !empty(customerAddress.city) ? customerAddress.city: "",
+			    	"State"								: !empty(customerAddress.stateCode) ? customerAddress.stateCode: "",
+			    	"ZipCode"							: !empty(customerAddress.postalCode) ? customerAddress.postalCode: "",
+			    	"ThreeLetterISORegionName"			: "NLD",
+			    	"IsPrimary"							: true,
+			    	"RecordId"							: !empty(customerAddress.UUID) ? customerAddress.UUID : "",
+					"DistrictName"						: "",
+					"Phone"								: customerAddress.phone,
+					"PhoneRecordId"						: "",
+					"PhoneExt"							: "",
+					"Email"								: "",
+					"EmailContent"						: "",
+					"EmailRecordId"						: "",
+					"Url"								: "",
+					"UrlRecordId"						: "",
+					"TwoLetterISORegionName"			: "",
+					"Deactivate"						: false,
+					"AttentionTo"						: "",
+					"BuildingCompliment"				: "",
+					"Postbox"							: "",
+					"TaxGroup"							: "",
+					"AddressType"						: 0,
+					"AddressTypeValue"					: 1,
+					"IsPrivate"							: false,
+					"PartyNumber"						: null,
+					"DirectoryPartyTableRecordId"		: "",
+					"DirectoryPartyLocationRecordId"	: "",
+					"DirectoryPartyLocationRoleRecordId": "",
+					"LogisticsLocationId"				: "",
+					"LogisticsLocationRecordId"			: "",
+					"LogisticsLocationExtRecordId"		: "",
+					"LogisticsLocationRoleRecordId"		: "",
+					"PhoneLogisticsLocationRecordId"	: "",
+					"PhoneLogisticsLocationId"			: "",
+					"EmailLogisticsLocationRecordId"	: "",
+					"EmailLogisticsLocationId"			: "",
+					"UrlLogisticsLocationRecordId"		: "",
+					"UrlLogisticsLocationId"			: "",
+					"ExpireRecordId"					: "",
+					"SortOrder"							: 1,
+					"EntityName"						: null,
+					"ExtensionData"						: null,
+					"ExtensionProperties"				: new Array(),
+					"Item"								: null,
+					"Company"							: customerObj.profile.companyName,
+					"Fax"								: "",
+					"EcomAddressId"						: "",
+					"EcomCustomerId"					: customerObj.profile.getCustomerNo(),
+					"Residential"						: "",
+					"CustomAttributes"					: new Array()
+			    };
+			    CUSTOMER_OBJECT.Customer.Addresses.push(addressObj);
+	    	}
+	    }
+	    
+	    CUSTOMER_OBJECT.Customer.Image					= null;
+	    CUSTOMER_OBJECT.Customer.EntityName				= null;
+        CUSTOMER_OBJECT.Customer.ExtensionData			= null;
+        CUSTOMER_OBJECT.Customer.ExtensionProperties	= [];
+        CUSTOMER_OBJECT.Customer.Item					= null;
+        CUSTOMER_OBJECT.Customer.EcomCustomerId			= null;
+        CUSTOMER_OBJECT.Customer.SLBirthMonth			= null;
+        CUSTOMER_OBJECT.Customer.CustomerAddresses		= null;
+        CUSTOMER_OBJECT.Customer.IsAsyncCustomer		= false;
+		
+		//Creating JSON Object
+		var requestObject = JSON.stringify(CUSTOMER_OBJECT);
+		
+		return requestObject;
+	}
+}
+
+module.exports=__CustomerFactory;

@@ -1,0 +1,21 @@
+'use strict';
+/**
+ * @module util/MyModel
+ */
+  var CustomObjectMgr = require('dw/object/CustomObjectMgr');
+  exports.createMyObject = function createMyObject( newsletterForm) 
+{
+           response.getWriter().println('in the model going to do magic');
+           var co:CustomObject=require('dw/object/CustomObject');
+           
+           var co:CustomObject = CustomObjectMgr.createCustomObject("NewsletterSubscription",newsletterForm.email.value);
+           
+		    //response.getWriter().println('fname inthe form is: '+newsletterForm.fname.value);
+		    co.custom.firstName=newsletterForm.fname.value;
+		    co.custom.lastName=newsletterForm.lname.value;
+		   
+
+         return co;
+};
+
+

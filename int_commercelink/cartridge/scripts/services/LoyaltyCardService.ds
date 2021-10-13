@@ -1,0 +1,62 @@
+/**
+	TaxService
+	
+	This file acts as a wrapper for Tax Service calls
+*/
+// import packages
+var dwsvc		= require ("dw/svc");
+var dwnet		= require ("dw/net");
+var dwsystem	= require ("dw/system");
+
+/* import scripts */ 
+
+/* import script modules */ 
+
+// any default variables
+var serviceName : String = "";
+
+/**
+ * 
+ * HTTP Services
+ * 
+ */
+var serviceConfig : Object = {
+	createRequest: function(service:dwsvc.HTTPService, requestDataContainer : Object, logger : dwsystem.Log) {		
+		return requestDataContainer;
+	},
+	/**
+	 * parseResponse()
+	 */
+	parseResponse : function (service : dwsvc.HTTPService, httpClient : dwnet.HTTPClient, logger : dwsystem.Log) {
+		// do some stuff
+		
+		
+		return;
+	},
+	/**
+	 * getRequestLogMessage()
+	 *	This function handles how the request is logged.  Make sure to mask any sensitive information (CC#, PIN's, Tokens etc)
+	 */
+	getRequestLogMessage : function(request : Object) : String {
+		return;
+	},
+	/**
+	 * getResponseLogMessage()
+	 	 *	This function handles how the response is logged.  Make sure to mask any sensitive information (CC#, PIN's, Tokens etc)
+	 */
+	getResponseLogMessage : function(response : Object) : String {
+		return
+	},
+	filterLogMessage : function (msg:String) {
+		return msg;
+	},
+	mockCall: function(svc : HTTPService, client : HTTPClient) {
+		return {
+			statusCode: 200,
+			statusMessage: "Success",
+			text: "MOCK RESPONSE (" + svc.URL + ")"
+		};
+	}
+};
+
+dwsvc.ServiceRegistry.configure(serviceName,serviceConfig);

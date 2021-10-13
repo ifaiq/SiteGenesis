@@ -1,0 +1,15 @@
+
+'use strict';
+
+/**
+ * @module BasketModel
+ */
+importPackage(dw.order);
+
+exports.getMyBasket  = function getMyBasket() {
+   
+	 var basketResult = new dw.system.Pipelet('GetBasket').execute({}); 
+	 var basket:Basket=basketResult.Basket;
+     return basket;
+	
+};

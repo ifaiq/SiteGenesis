@@ -1,0 +1,9 @@
+<!--- TEMPLATENAME: notFound.isml --->
+<html>
+	<head>
+	<title>Not Found</title>
+	</head>
+	<body>
+		<h2>Could not find the parameter!</h2>
+	</body>
+</html>

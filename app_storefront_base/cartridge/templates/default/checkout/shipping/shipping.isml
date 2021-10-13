@@ -1,0 +1,29 @@
+<div class="shipping-form" data-initial-state="${pdict.initialState}">
+    <div class="card">
+        <div class="card-header">
+            <h4>${Resource.msg('heading.checkout.shipping', 'checkout', null)}</h4>
+        </div>
+
+        <div class="card-body form-nav shipping-nav">
+            <isif condition="${pdict.order.items.items.length>1}">
+                <form action="${URLUtils.url('CheckoutShippingServices-ToggleMultiShip')}" novalidate>
+                    <fieldset>
+                        <div class="custom-control custom-checkbox">
+                            <input name="usingMultiShipping" class="custom-control-input" id="multiShipCheck" type="checkbox"
+                                <isif condition="${pdict.order.usingMultiShipping && pdict.order.shipping.length > 1}">
+                                    checked
+                                </isif>
+                            >
+                            <label class="checkout-checkbox custom-control-label" for="multiShipCheck">
+                                ${Resource.msg('check.shipping.multiship', 'checkout', null)}
+                            </label>
+                        </div>
+                    </fieldset>
+                </form>
+            </isif>
+        </div>
+
+        <isinclude template="checkout/shipping/singleShipping" />
+    </div>
+    <isinclude template="checkout/shipping/multiShipping" />
+</div>

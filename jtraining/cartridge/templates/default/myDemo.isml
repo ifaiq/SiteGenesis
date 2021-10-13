@@ -1,0 +1,12 @@
+<!--- TEMPLATENAME: myDemo.isml --->
+<h1>
+
+${Resource.msg('myKey1','myLocale',null)}
+
+</h1>
+
+
+<br>
+
+
+${Resource.msg('myKey2','myLocale',null)}

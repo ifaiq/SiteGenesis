@@ -1,0 +1,581 @@
+/**
+*	Name: CommerceLinkFactory
+*	Description:
+*		This script creates a factory object that stores all CommerceLink constants, utility helper functions to get or
+*	pivot off of site preferences based on values, as well as build the requestDataContainer Objects for all the CommerceLink services
+*	If the requestDataContainer methods get excessive than they may be broken into smaller files, leaving this factory file
+*	with core functionality to CommerceLink
+*/
+var dwsvc		= require ("dw/svc");
+var dworder		= require ("dw/order");
+var dwcustomer	= require ("dw/customer");
+var dwnet		= require ("dw/net");
+var dwsystem	= require ("dw/system");
+var dwvalue		= require ("dw/value");
+var dwutil		= require ("dw/util");
+var dwcatalog	= require ("dw/catalog");
+var dwcampaign  = require ("dw/campaign");
+var dwweb 		= require ("dw/web");
+var Logger      = require('dw/system/Logger');
+var Transaction = require('dw/system/Transaction');
+
+var CommerceLinkCurrentSite = dwsystem.Site.getCurrent();
+var CurrentSitePreferences = dwsystem.Site.getCurrent().getPreferences().getCustom();
+
+var __CommerceLinkFactory : Object = {
+	FEATURES : {
+		CHANNEL: 		"CHANNEL",
+		ORDER:			"ORDER",
+		INVENTORY:		"INVENTORY",
+		STORE:			"STORE",
+		SHIPPING:		"SHIPPING",
+		CUSTOMER: 		"CUSTOMER",
+		GIFT_CARD: 		"GIFT_CARD",
+		WISHLIST:		"WISHLIST",
+		QUOTATION:		"QUOTATION",
+		PRICE_DISCOUNT:	"PRICE_DISCOUNT",
+		PAYMENT:		"PAYMENT",
+		LOYALTY:		"LOYALTY",
+		CONTACT_PERSON:	"CONTACT_PERSON"
+	},
+	SESSION_VARS: {
+		SOME_STRING : "Test_For_Looping"
+	}, 	
+	SERVICES: {
+		CHANNEL: 		"commercelink.api.test",
+		ORDER:			"commercelink.api.order",
+		INVENTORY:		"commercelink.api.inventory",
+		STORE:			"commercelink.api.store",
+		SHIPPING:		"commercelink.api.shipping",
+		CUSTOMER: 		"commercelink.api.customer",
+		GIFT_CARD: 		"commercelink.api.giftcard",
+		WISHLIST:		"commercelink.api.wishlist",
+		QUOTATION:		"commercelink.api.quotation",
+		PRICE_DISCOUNT:	"commercelink.api.discount",
+		PAYMENT:		"commercelink.api.payment",
+		LOYALTY:		"commercelink.api.loyalty",
+		CONTACT_PERSON:	"commercelink.api.contact"
+	},
+	HOOKS: {
+		CHANNEL: {
+			PUBLISH: {
+				ID:					"commercelink.api.test.publish",
+				SCRIPT:				"ChannelPublish"
+			}
+		},
+		ORDER:{
+			CREATE: {				
+				ID:					"commercelink.api.order.create",
+				SCRIPT:				"CreateOrder"
+			}
+		},
+		INVENTORY: {
+			AVAILABILITY: {
+				ID:					"commercelink.api.inventory.availability",
+				SCRIPT:				"ATPInventory"
+			}
+		},
+		STORE: {
+			AVAILABILITY: {
+				ID:					"commercelink.api.store.availability",
+				SCRIPT:				"GetStoreAvailability"
+			}
+		},
+		SHIPPING: {
+			ESTIMATE: {
+				ID:					"commercelink.api.shipping.estimate",
+				SCRIPT:				"EstimateShippingCharges"
+			}
+		},
+		PAYMENT: {
+			TOKENIZE: {
+				ID:					"commercelink.api.payment.tokenize",
+				SCRIPT:				"TokenizeCard"
+			},
+			PROCESS: {
+				ID:					"commercelink.api.payment.process",
+				SCRIPT:				"ProcessPayment"
+			},
+			PENDING: {
+				ID:					"commercelink.api.payment.pending",
+				SCRIPT:				"ProcessPendingOrderPayments"
+			},
+			CANCEL: {
+				ID:					"commercelink.api.payment.cancel",
+				SCRIPT:				"CancelPayments"
+			},
+			VOID: {
+				ID:					"commercelink.api.payment.void",
+				SCRIPT:				"VoidCardAuthorization"
+			},
+			REFUND: {
+				ID:					"commercelink.api.payment.refund",
+				SCRIPT:				"RefundPayment"
+			}
+		},
+		PRICE_DISCOUNT: {
+			DISCOUNT: {
+				ID:					"commercelink.api.price.discount",
+				SCRIPT:				"GetIndependentProductPriceDiscount"
+			}
+		},
+		CUSTOMER: {
+			CREATE: {
+				ID:					"commercelink.api.customer.create",
+				SCRIPT:				"CreateCustomer"
+			},
+			UPDATE: {
+				ID:					"commercelink.api.customer.update",
+				SCRIPT:				"UpdateCustomer"
+			},
+			GET: {
+				ID:					"commercelink.api.customer.get",
+				SCRIPT:				"GetCustomer"
+			}
+		},
+		GIFT_CARD: {
+			ISSUE: {
+				ID:					"commercelink.api.giftcard.issue",
+				SCRIPT:				"IssueGiftCard"
+			},
+			GET_BALANCE: {
+				ID:					"commercelink.api.giftcard.balance",
+				SCRIPT:				"GetGiftCardBalance"
+			},
+			UNLOCK: {
+				ID:					"commercelink.api.giftcard.unlock",
+				SCRIPT:				"UnlockGiftCard"
+			},
+			LOCK: {
+				ID:					"commercelink.api.giftcard.lock",
+				SCRIPT:				"LockGiftCard"
+			},
+			PAY: {
+				ID:					"commercelink.api.giftcard.pay",
+				SCRIPT:				"PayGiftCard"
+			}
+		},
+		WISHLIST: {
+			CREATE: {
+				ID:					"commercelink.api.wishlist.create",
+				SCRIPT:				"CreateWishlist"
+			},
+			GET: {
+				ID:					"commercelink.api.wishlist.get",
+				SCRIPT:				"GetWishlist"
+			},
+			DELETE: {
+				ID:					"commercelink.api.wishlist.delete",
+				SCRIPT:				"DeleteWishlist"
+			},
+			CREATE_LINE: {
+				ID:					"commercelink.api.wishlist.createline",
+				SCRIPT:				"CreateWishlistLine"
+			},
+			DELETE_LINE: {
+				ID:					"commercelink.api.wishlist.deleteline",
+				SCRIPT:				"DeleteWishlistLine"
+			},
+			UPDATE_LINE: {
+				ID:					"commercelink.api.wishlist.updateline",
+				SCRIPT:				"UpdateWishlistLine"
+			}
+		},
+		QUOTATION: {
+			CREATE: {
+				ID:					"commercelink.api.quotation.create",
+				SCRIPT:				"CreateQuotation"
+			},
+			GET: {
+				ID:					"commercelink.api.quotation.get",
+				SCRIPT:				"GetQuotation"
+			}
+		},
+		LOYALTY: {
+			STATUS: {
+				ID:					"commercelink.api.loyalty.status",
+				SCRIPT:				"GetLoyaltyStatus"
+			},
+			ISSUE: {
+				ID:					"commercelink.api.loyalty.issue",
+				SCRIPT:				"IssueLoyaltyCard"
+			},
+			GET: {
+				ID:					"commercelink.api.loyalty.get",
+				SCRIPT:				"GetCustomerLoyaltyCards"
+			},
+			STATUS: {
+				ID:					"commercelink.api.loyalty.status",
+				SCRIPT:				"GetLoyaltyCardRewardPointsStatus"
+			},
+			POST_POINTS: {
+				ID:					"commercelink.api.loyalty.postpoints",
+				SCRIPT:				"PostLoyaltyRewardPoints"
+			},
+			GET_TRANSACTIONS: {
+				ID:					"commercelink.api.loyalty.gettransactions",
+				SCRIPT:				"GetLoyaltyCardTransactions"
+			}
+		},
+		CONTACT_PERSON: {
+			CREATE: {
+				ID:					"commercelink.api.contactperson.create",
+				SCRIPT:				"CreateContactPerson"
+			},
+			GET: {
+				ID:					"commercelink.api.contactperson.get",
+				SCRIPT:				"GetContactPerson"
+			},
+			UPDATE: {
+				ID:					"commercelink.api.contactperson.update",
+				SCRIPT:				"UpdateContactPerson"
+			}
+		}
+	},
+	CONFIGURATIONS: {
+		CHANNEL: {
+			RESOURCE:	"Channel",
+			ACTION: 	"Publish",
+			TYPE:		"GET"
+		},
+		ORDER:{
+			CREATE:{
+				RESOURCE:	"salesorder",
+				ACTION: 	"CreateSalesOrderTransaction",
+				TYPE:		"POST"
+			}
+		},
+		INVENTORY: {
+			AVAILABILITY:{
+				RESOURCE:	"Inventory",
+				ACTION: 	"ATPInventory",
+				TYPE:		"GET"
+			}
+		},
+		STORE: {
+			AVAILABILITY:{
+				RESOURCE:	"store",
+				ACTION: 	"GetStoreAvailability",
+				TYPE:		"GET"
+			}
+		},
+		SHIPPING: {
+			ESTIMATE: {
+				RESOURCE:	"Shipping",
+				ACTION: 	"EstimateShippingCharges",
+				TYPE:		"POST"
+			}
+		},
+		PAYMENT: {
+			TOKENIZE: {
+				RESOURCE:	"Payment",
+				ACTION: 	"TokenizeCard",
+				TYPE:		"POST"
+			},
+			PROCESS: {
+				RESOURCE:	"Payment",
+				ACTION: 	"ProcessPayment",
+				TYPE:		"POST"
+			},
+			PENDING: {
+				RESOURCE:	"Payment",
+				ACTION: 	"ProcessPendingOrderPayments",
+				TYPE:		"POST"
+			},
+			CANCEL: {
+				RESOURCE:	"Payment",
+				ACTION: 	"CancelPayments",
+				TYPE:		"GET"
+			},
+			VOID: {
+				RESOURCE:	"Payment",
+				ACTION: 	"VoidCardAuthorization",
+				TYPE:		"GET"
+			},
+			REFUND: {
+				RESOURCE:	"Payment",
+				ACTION: 	"RefundPayment",
+				TYPE:		"GET"
+			}
+		},
+		PRICE_DISCOUNT: {
+			DISCOUNT: {
+				RESOURCE:	"PriceDiscount",
+				ACTION: 	"GetIndependentProductPriceDiscount",
+				TYPE:		"POST"
+			}
+		},
+		CUSTOMER: {
+			CREATE:{
+				RESOURCE:	"customer",
+				ACTION: 	"CreateCustomer",
+				TYPE:		"POST"
+			},
+			UPDATE:{
+				RESOURCE:	"Customer",
+				ACTION: 	"UpdateCustomer",
+				TYPE:		"POST"
+			},
+			GET:{
+				RESOURCE:	"Customer",
+				ACTION: 	"GetCustomer",
+				TYPE:		"POST"
+			},
+		},
+		GIFT_CARD: {
+			ISSUE:{
+				RESOURCE:	"giftcard",
+				ACTION: 	"IssueGiftCard",
+				TYPE:		"POST"
+			},
+			GET_BALANCE:{
+				RESOURCE:	"giftcard",
+				ACTION: 	"GetGiftCardBalance",
+				TYPE:		"GET"
+			},
+			UNLOCK:{
+				RESOURCE:	"giftcard",
+				ACTION: 	"UnlockGiftCard",
+				TYPE:		"GET"
+			},
+			LOCK:{
+				RESOURCE:	"giftcard",
+				ACTION: 	"lockGiftCard",
+				TYPE:		"GET"
+			},
+			PAY:{
+				RESOURCE:	"giftcard",
+				ACTION: 	"PayGiftCard",
+				TYPE:		"POST"
+			}
+		},
+		WISHLIST: {
+			CREATE:{
+				RESOURCE:	"WishList",
+				ACTION: 	"CreateWishList",
+				TYPE:		"POST"
+			},
+			GET: {
+				RESOURCE:	"WishList",
+				ACTION: 	"GetWishLists",
+				TYPE:		"GET"
+			},
+			DELETE: {
+				RESOURCE:	"WishList",
+				ACTION: 	"DeleteWishList",
+				TYPE:		"DELETE"
+			},
+			CREATE_LINE: {
+				RESOURCE:	"WishList",
+				ACTION: 	"CreateWishListLine",
+				TYPE:		"POST"
+			},
+			DELETE_LINE: {
+				RESOURCE:	"WishList",
+				ACTION: 	"UpdateWishListLine",
+				TYPE:		"DELETE"
+			},
+			UPDATE_LINE: {
+				RESOURCE:	"WishList",
+				ACTION: 	"DeleteWishListLine",
+				TYPE:		"POST"
+			}
+		},
+		QUOTATION: {
+			CREATE: {
+				RESOURCE:	"Quotation",
+				ACTION: 	"CreateQuotation",
+				TYPE:		"POST"
+			},
+			GET: {
+				RESOURCE:	"Quotation",
+				ACTION: 	"GetQuotation",
+				TYPE:		"GET"
+			}
+		},
+		LOYALTY: {
+			STATUS: {
+				RESOURCE:	"LoyaltyCard",
+				ACTION: 	"GetLoyaltyCardStatus",
+				TYPE:		"GET"
+			},
+			ISSUE: {
+				RESOURCE:	"LoyaltyCard",
+				ACTION: 	"IssueLoyaltyCard",
+				TYPE:		"POST"
+			},
+			GET: {
+				RESOURCE:	"LoyaltyCard",
+				ACTION: 	"GetCustomerLoyaltyCards",
+				TYPE:		"GET"
+			},
+			STATUS: {
+				RESOURCE:	"LoyaltyCard",
+				ACTION: 	"GetLoyaltyCardRewardPointsStatus",
+				TYPE:		"GET"
+			},
+			POST_POINTS: {
+				RESOURCE:	"LoyaltyCard",
+				ACTION: 	"PostLoyaltyRewardPoints",
+				TYPE:		"POST"
+			},
+			GET_TRANSATIONS: {
+				RESOURCE:	"LoyaltyCard",
+				ACTION: 	"GetLoyaltyCardTransactions",
+				TYPE:		"GET"
+			}
+		},
+		CONTACT_PERSON: {
+			CREATE:{
+				RESOURCE:	"ContactPerson",
+				ACTION: 	"CreateContactPerson",
+				TYPE:		"POST"
+			},
+			GET: {
+				RESOURCE:	"ContactPerson",
+				ACTION: 	"GetContactPerson",
+				TYPE:		"GET"
+			},
+			UPDATE: {
+				RESOURCE:	"ContactPerson",
+				ACTION: 	"UpdateContactPerson",
+				TYPE:		"POST"
+			}
+		}
+	},
+	STATUS_CODES: {
+		RESPONSE_OBJECT:			"RESPONSE",
+		EXCEPTION_OBJECT:			"EXCEPTION",
+		SERVICE_RESULT:				"RESULT",
+		GENERAL: {
+			SERVICE_NOT_ENABLED: 	"ServiceNotEnabledFromPreferences",
+			SUCCESS: 				"Success",
+			SUCCESS_ERROR: 			"StatusCodeNot200Error_SomethingHappenedFrom_(result.error != 0 || result.errorMessage != null || result.mockResult)",
+			EXCEPTION_ERROR: 		"CatchBlockExecuted_SomeException_Ocuured"
+		},
+		CHANNEL:{
+			PUBLISH: {}
+		},
+		ORDER: {
+			CREATE: {
+				SUCESS_STATUS: 		"200",
+				ERROR_STATUS:		"500",
+				ERROR_MESSAGE: 		"Received status Code is not 200, there maybe some issue on AX side",
+				RESPONSE_ERROR:		"Status Code is 200 but some error occured in AX while creating order"
+			}	
+		},
+		INVENTORY: {
+			AVAILABILITY: {}
+		},
+		CUSTOMER: {
+			CREATE: {
+				SUCESS_STATUS: 		"200",
+				ERROR_STATUS:		"500",
+				ERROR_MESSAGE: 		"Received status Code is not 200, there maybe some issue on AX side",
+				RESPONSE_ERROR:		"Status Code is 200 but some error occured in AX while creating customer"
+			},
+			UPDATE: {},
+			GET: {}
+		},
+		GIFT_CARD: {
+			ISSUE: {
+				SUCESS_STATUS: 		"200",
+				ERROR_STATUS:		"500",
+				ERROR_MESSAGE: 		"Received status Code is not 200, there maybe some issue on AX side",
+				RESPONSE_ERROR:		"Status Code is 200 but some error occured in AX while issuing giftcard"
+			},
+			GET_BALANCE: {
+				SUCESS_STATUS: 		"200",
+				ERROR_STATUS:		"500",
+				ERROR_MESSAGE: 		"Received status Code is not 200, there maybe some issue on AX side",
+				RESPONSE_ERROR:		"Status Code is 200 but some error occured in AX while getting giftcard balance"
+			},
+			UNLOCK: {
+				SUCESS_STATUS: 		"200",
+				ERROR_STATUS:		"500",
+				ERROR_MESSAGE: 		"Received status Code is not 200, there maybe some issue on AX side",
+				RESPONSE_ERROR:		"Status Code is 200 but some error occured in AX while unlocking giftcard"
+			},
+			LOCK: {
+				SUCESS_STATUS: 		"200",
+				ERROR_STATUS:		"500",
+				ERROR_MESSAGE: 		"Received status Code is not 200, there maybe some issue on AX side",
+				RESPONSE_ERROR:		"Status Code is 200 but some error occured in AX while locking giftcard"
+			},
+			PAY: {
+				SUCESS_STATUS: 		"200",
+				ERROR_STATUS:		"500",
+				ERROR_MESSAGE: 		"Received status Code is not 200, there maybe some issue on AX side",
+				RESPONSE_ERROR:		"Status Code is 200 but some error occured in AX while paying giftcard"
+			}
+		},
+		WISHLIST: {
+			CREATE: {
+				SUCESS_STATUS: 		"200",
+				ERROR_STATUS:		"500",
+				ERROR_MESSAGE: 		"Received status Code is not 200, there maybe some issue on AX side",
+				RESPONSE_ERROR:		"Status Code is 200 but some error occured in AX while creating wishlist"
+			},
+			GET: {
+				SUCESS_STATUS: 		"200",
+				ERROR_STATUS:		"500",
+				ERROR_MESSAGE: 		"Received status Code is not 200, there maybe some issue on AX side",
+				RESPONSE_ERROR:		"Status Code is 200 but some error occured in AX while getting wishlist"
+			},
+			DELETE: {
+				SUCESS_STATUS: 		"200",
+				ERROR_STATUS:		"500",
+				ERROR_MESSAGE: 		"Received status Code is not 200, there maybe some issue on AX side",
+				RESPONSE_ERROR:		"Status Code is 200 but some error occured in AX while deleting wishlist"
+			},
+			CREATE_LINE: {
+				SUCESS_STATUS: 		"200",
+				ERROR_STATUS:		"500",
+				ERROR_MESSAGE: 		"Received status Code is not 200, there maybe some issue on AX side",
+				RESPONSE_ERROR:		"Status Code is 200 but some error occured in AX while creating wishlist line"
+			},
+			DELETE_LINE: {
+				SUCESS_STATUS: 		"200",
+				ERROR_STATUS:		"500",
+				ERROR_MESSAGE: 		"Received status Code is not 200, there maybe some issue on AX side",
+				RESPONSE_ERROR:		"Status Code is 200 but some error occured in AX while deleting wishlist line"
+			},
+			UPDATE_LINE: {
+				SUCESS_STATUS: 		"200",
+				ERROR_STATUS:		"500",
+				ERROR_MESSAGE: 		"Received status Code is not 200, there maybe some issue on AX side",
+				RESPONSE_ERROR:		"Status Code is 200 but some error occured in AX while updating wishlist line"
+			}
+		}
+	},
+	//Site Pref
+	Preferences: CurrentSitePreferences,
+	/**
+     * @function
+     * @description appends the parameter with the given name and value to the given url and returns the changed url
+     * @param {String} url the url to which the parameter will be added
+     * @param {String} name the name of the parameter
+     * @param {String} value the value of the parameter
+     */
+    appendParamToURL: function (url, name, value) {
+        // quit if the param already exists
+        if (url.indexOf(name + '=') !== -1) {
+            return url;
+        }
+        var separator = url.indexOf('?') !== -1 ? '&' : '?';
+        return url + separator + name + '=' + encodeURIComponent(value);
+    },
+	getLogger : function (method : String) : dwsystem.Log {
+		var categoryName : String = !empty(method) ? method : 'CommerceLink_General';
+		var fileName : String = 'CommerceLink';
+	
+		return dwsystem.Logger.getLogger(fileName, categoryName);	
+	},
+	
+	getSitePref : function (ID:String) : Object {
+		var returnObj = !empty(dwsystem.Site.getCurrent()) ? dwsystem.Site.getCurrent().getCustomPreferenceValue(ID) : null;
+		return returnObj;	
+	}
+}
+// maybe just exports
+module.exports=__CommerceLinkFactory;

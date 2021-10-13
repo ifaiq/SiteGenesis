@@ -1,0 +1,15 @@
+{
+  
+   "init": [
+   		"./cartridge/scripts/services/ChannelService.ds",
+   		"./cartridge/scripts/services/SalesOrderService.ds",
+   		"./cartridge/scripts/services/CustomerService.ds",
+   		"./cartridge/scripts/services/GiftCardService.ds",
+   		"./cartridge/scripts/services/WishListService.ds",
+   		"./cartridge/scripts/services/InventoryService.ds",
+   		"./cartridge/scripts/services/StoreService.ds",
+   		"./cartridge/scripts/services/QuotationService.ds",
+   		"./cartridge/scripts/services/ContactPersonService.ds"
+   	],
+   "hooks": "./cartridge/scripts/hooks.json"
+}

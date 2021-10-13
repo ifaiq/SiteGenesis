@@ -1,0 +1,32 @@
+/**
+*	Name: WishlistFactory
+*	Description:
+*		This script creates a factory object builds the requestDataContainer Objects for all the radial Wishlist Create service calls
+*/
+var dwsvc		= require ("dw/svc");
+var dwnet		= require ("dw/net");
+var dwsystem	= require ("dw/system");
+var dwvalue		= require ("dw/value");
+var dwutil		= require ("dw/util");
+
+var CommerceLinkFactory = require ("~/cartridge/scripts/utils/CommerceLinkFactory");
+
+var __StoreFactory : Object = {
+	// Public Methods
+	
+	/**
+	* Builds JSON request packet for creating new Wishlist
+	*/
+	buildGetStoreAvailabilityRequestObject : function(args) {
+		var STORE_OBJECT = {
+			itemId		: args.itemId,
+			variantId	: args.variantId
+		}
+		//Creating JSON Object
+		var requestObject = JSON.stringify(STORE_OBJECT);
+		
+		return requestObject;
+	}
+}
+
+module.exports=__StoreFactory;

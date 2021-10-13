@@ -1,0 +1,311 @@
+/**
+*	Name: QuotationFactory
+*	Description:
+*		This script creates a factory object builds the requestDataContainer Objects for all the radial Quotation Create service calls
+*/
+var dwsvc		= require ("dw/svc");
+var dwquotation	= require ("dw/quotation");	// TO-DO: create this file and code in it
+var dwnet		= require ("dw/net");
+var dwsystem	= require ("dw/system");
+var dwvalue		= require ("dw/value");
+var dwutil		= require ("dw/util");
+
+var CommerceLinkFactory = require ("~/cartridge/scripts/utils/CommerceLink");
+
+var __QuotationFactory : Object = {
+	// Public Methods
+	
+	/**
+	* Builds JSON request packet for creating new Quotation
+	*/
+	buildCreateQuotationRequestObject : function(args) {
+		var quotationObj = args.quotation;
+		var QUOTATION_OBJECT = new Object();
+		QUOTATION_OBJECT.customerQuotation					= new Object();
+		QUOTATION_OBJECT.customerQuotation.AddressRecordId	= quotationObj.customerQuotation.AddressRecordId;
+		QUOTATION_OBJECT.customerQuotation.Affiliations		= new Array();
+
+		var quotation_customerQuotation_Affiliation = new Object();
+	    if(!empty(quotationObj.customerQuotation.Affiliations)) {
+	    	for (var i = 0; i < quotationObj.customerQuotation.Affiliations.length; i++) {
+	    		quotation_customerQuotation_Affiliation = quotationObj.customerQuotation.Affiliations[i];
+	    		var AffiliationObj = {
+					"AffiliationRecordId"	: quotation_customerQuotation_Affiliation.AffiliationRecordId,
+					"AffiliationType"		: quotation_customerQuotation_Affiliation.AffiliationType,
+					"LoyaltyTierRecordId"	: quotation_customerQuotation_Affiliation.LoyaltyTierRecordId
+	    		}
+	    		QUOTATION_OBJECT.customerQuotation.Affiliations.push(AffiliationObj);
+	    	}
+	    }
+	    
+	    QUOTATION_OBJECT.customerQuotation.AllocationPriority	= quotationObj.customerQuotation.AllocationPriority;
+	    QUOTATION_OBJECT.customerQuotation.AutoPickOrder		= quotationObj.customerQuotation.AutoPickOrder;
+	    QUOTATION_OBJECT.customerQuotation.ChannelRecordId		= quotationObj.customerQuotation.ChannelRecordId;
+	    QUOTATION_OBJECT.customerQuotation.ChannelReferenceId	= quotationObj.customerQuotation.ChannelReferenceId;
+	    QUOTATION_OBJECT.customerQuotation.Charges				= new Array();
+
+	    var quotation_customerQuotation_Charge = new Object();
+	    if(!empty(quotationObj.customerQuotation.Affiliations)) {
+	    	for (var j = 0; j < quotationObj.customerQuotation.Charges.length; j++) {
+	    		quotation_customerQuotation_Charge = quotationObj.customerQuotation.Charges[j];
+	    		var ChargeObj = {
+	    			"Amount"		: quotation_customerQuotation_Charge.Amount,
+			        "Code"			: quotation_customerQuotation_Charge.Code,
+			        "Method"		: quotation_customerQuotation_Charge.Method,
+			        "SalesTaxGroup"	: quotation_customerQuotation_Charge.SalesTaxGroup,
+			        "TaxGroup"		: quotation_customerQuotation_Charge.TaxGroup
+	    		}
+	    		QUOTATION_OBJECT.customerQuotation.Charges.push(ChargeObj);
+	    	}
+	    }
+	    QUOTATION_OBJECT.customerQuotation.Comment				= quotationObj.customerQuotation.Comment;
+	    QUOTATION_OBJECT.customerQuotation.CommissionSalesGroup	= quotationObj.customerQuotation.CommissionSalesGroup;
+	    QUOTATION_OBJECT.customerQuotation.ContinuityLineEval	= quotationObj.customerQuotation.ContinuityLineEval;
+	    QUOTATION_OBJECT.customerQuotation.CreationDateString	= quotationObj.customerQuotation.CreationDateString;
+	    QUOTATION_OBJECT.customerQuotation.CreditCardToken		= quotationObj.customerQuotation.CreditCardToken;
+	    QUOTATION_OBJECT.customerQuotation.CurrencyCode			= quotationObj.customerQuotation.CurrencyCode;
+	    QUOTATION_OBJECT.customerQuotation.CustomerAccount		= quotationObj.customerQuotation.CustomerAccount;
+	    QUOTATION_OBJECT.customerQuotation.CustomerRecordId		= quotationObj.customerQuotation.CustomerRecordId;
+	    QUOTATION_OBJECT.customerQuotation.DeliveryMode			= quotationObj.customerQuotation.DeliveryMode;
+	    QUOTATION_OBJECT.customerQuotation.DocumentStatus		= quotationObj.customerQuotation.DocumentStatus;
+	    QUOTATION_OBJECT.customerQuotation.Email				= quotationObj.customerQuotation.Email;
+	    QUOTATION_OBJECT.customerQuotation.ExpiryDateString		= quotationObj.customerQuotation.ExpiryDateString;
+	    QUOTATION_OBJECT.customerQuotation.ExtensionProperties	= new Array();
+
+	    var quotation_customerQuotation_ExtensionProperty = new Object();
+	    if(!empty(quotationObj.customerQuotation.ExtensionProperties)) {
+	    	for (var k = 0; k < quotationObj.customerQuotation.ExtensionProperties.length; k++) {
+	    		quotation_customerQuotation_ExtensionProperty = quotationObj.customerQuotation.ExtensionProperties[k];
+	    		var ExtensionPropertyObj = {
+	    			"Key"	:	quotation_customerQuotation_ExtensionProperty.Key,
+	    			"Value"	:	new Object()
+	    		}
+	    		ExtensionPropertyObj.Value = quotation_customerQuotation_ExtensionProperty.Value; // Value object have multiple attributes
+	    		/*ExtensionPropertyObj.Value.BooleanValue			= quotation_customerQuotation_ExtensionProperty.Value.BooleanValue;
+	    		ExtensionPropertyObj.Value.ByteValue			= quotation_customerQuotation_ExtensionProperty.Value.ByteValue;
+	    		ExtensionPropertyObj.Value.DecimalValue			= quotation_customerQuotation_ExtensionProperty.Value.DecimalValue;
+	    		ExtensionPropertyObj.Value.DateTimeOffsetValue	= quotation_customerQuotation_ExtensionProperty.Value.DateTimeOffsetValue;
+	    		ExtensionPropertyObj.Value.IntegerValue			= quotation_customerQuotation_ExtensionProperty.Value.IntegerValue;
+	    		ExtensionPropertyObj.Value.LongValue			= quotation_customerQuotation_ExtensionProperty.Value.LongValue;
+	    		ExtensionPropertyObj.Value.StringValue			= quotation_customerQuotation_ExtensionProperty.Value.StringValue;
+	    		*/
+	    		QUOTATION_OBJECT.customerQuotation.ExtensionProperties.push(ExtensionPropertyObj);
+	    	}
+	    }
+		QUOTATION_OBJECT.customerQuotation.HasLoyaltyPayment			= quotationObj.customerQuotation.HasLoyaltyPayment;
+		QUOTATION_OBJECT.customerQuotation.Id							= quotationObj.customerQuotation.Id;
+		QUOTATION_OBJECT.customerQuotation.IsCatalogUpSellShown			= quotationObj.customerQuotation.IsCatalogUpSellShown;
+		QUOTATION_OBJECT.customerQuotation.IsContinuityChild			= quotationObj.customerQuotation.IsContinuityChild;
+		QUOTATION_OBJECT.customerQuotation.IsContinuityOrder			= quotationObj.customerQuotation.IsContinuityOrder;
+		QUOTATION_OBJECT.customerQuotation.IsFTCExempt					= quotationObj.customerQuotation.IsFTCExempt;
+		QUOTATION_OBJECT.customerQuotation.IsInstallmentBillingPrompt	= quotationObj.customerQuotation.IsInstallmentBillingPrompt;
+		QUOTATION_OBJECT.customerQuotation.IsInstallmentOrderSubmitted	= quotationObj.customerQuotation.IsInstallmentOrderSubmitted;
+		QUOTATION_OBJECT.customerQuotation.IsPriceOverride				= quotationObj.customerQuotation.IsPriceOverride;
+		QUOTATION_OBJECT.customerQuotation.IsTaxIncludedInPrice			= quotationObj.customerQuotation.IsTaxIncludedInPrice;
+		QUOTATION_OBJECT.customerQuotation.Items						= new Array();
+		
+		var quotation_customerQuotation_Item = new Object();
+	    if(!empty(quotationObj.customerQuotation.Items)) {
+	    	for (var l = 0; l < quotationObj.customerQuotation.Items.length; l++) {
+	    		quotation_customerQuotation_Item = quotationObj.customerQuotation.Items[l];
+	    		var ItemObj = {
+	    			"AddressRecordId"	: quotation_customerQuotation_Item.AddressRecordId,
+	    			"BatchId"			: quotation_customerQuotation_Item.BatchId,
+			        "Catalog"			: quotation_customerQuotation_Item.Catalog,
+			        "Charges"			: new Array()
+	    		}
+	    		
+				var quotation_customerQuotation_Item_Charge = new Object();
+	    		if(!empty(quotationObj.customerQuotation.Items.Charges)) {
+			    	for (var m = 0; m < quotationObj.customerQuotation.Items.Charges.length; m++) {
+			    		quotation_customerQuotation_Item_Charge = quotationObj.customerQuotation.Items.Charges[m];
+			    		var ChargeObj = {
+			    			"Amount"		: quotation_customerQuotation_Item_Charge.Amount,
+			    			"Code"			: quotation_customerQuotation_Item_Charge.Code,
+					        "Method"		: quotation_customerQuotation_Item_Charge.Method,
+					        "SalesTaxGroup"	: quotation_customerQuotation_Item_Charge.SalesTaxGroup,
+					        "TaxGroup"		: quotation_customerQuotation_Item_Charge.TaxGroup
+			    		}
+			    		ItemObj.Charges.push(ChargeObj);
+			    	}
+	    		}
+				ItemObj.ColorId 				= quotation_customerQuotation_Item.ColorId;
+				ItemObj.ColorName 				= quotation_customerQuotation_Item.ColorName;
+				ItemObj.Comment 				= quotation_customerQuotation_Item.Comment;
+				ItemObj.CommissionSalesGroup 	= quotation_customerQuotation_Item.CommissionSalesGroup;
+				ItemObj.ConfigId 				= quotation_customerQuotation_Item.ConfigId;
+				ItemObj.ConfigName 				= quotation_customerQuotation_Item.ConfigName;
+				ItemObj.ContinuityScheduleId	= quotation_customerQuotation_Item.ContinuityScheduleId;
+				ItemObj.CustInvoiceTransId 		= quotation_customerQuotation_Item.CustInvoiceTransId;
+				ItemObj.DeliveryMode 			= quotation_customerQuotation_Item.DeliveryMode;
+				ItemObj.Discount 				= quotation_customerQuotation_Item.Discount;
+				ItemObj.DiscountPercent 		= quotation_customerQuotation_Item.DiscountPercent;
+	    		ItemObj.Discounts 				= new Array();
+	    		
+	    		var quotation_customerQuotation_Item_Discount = new Object();
+	    		if(!empty(quotationObj.customerQuotation.Items.Charges)) {
+			    	for (var n = 0; n < quotationObj.customerQuotation.Items.Discounts.length; n++) {
+			    		quotation_customerQuotation_Item_Discount = quotationObj.customerQuotation.Items.Discounts[n];
+			    		var DiscountObj = {
+			    			"Amount"					: quotation_customerQuotation_Item_Discount.Amount,
+							"CustomerDiscountType"		: quotation_customerQuotation_Item_Discount.CustomerDiscountType,
+							"DealPrice"					: quotation_customerQuotation_Item_Discount.DealPrice,
+							"DiscountAmount"			: quotation_customerQuotation_Item_Discount.DiscountAmount,
+							"DiscountCode"				: quotation_customerQuotation_Item_Discount.DiscountCode,
+							"DiscountCost"				: quotation_customerQuotation_Item_Discount.DiscountCost,
+							"DiscountOriginType"		: quotation_customerQuotation_Item_Discount.DiscountOriginType,
+							"ManualDiscountType"		: quotation_customerQuotation_Item_Discount.ManualDiscountType,
+							"OfferName"					: quotation_customerQuotation_Item_Discount.OfferName,
+							"Percentage"				: quotation_customerQuotation_Item_Discount.Percentage,
+							"PeriodicDiscountOfferId"	: quotation_customerQuotation_Item_Discount.PeriodicDiscountOfferId
+			    		}
+			    		ItemObj.Discounts.push(DiscountObj);
+			    	}
+	    		}
+	    		ItemObj.ExchangeInventTransId			= quotation_customerQuotation_Item.ExchangeInventTransId;
+				ItemObj.FulfillmentStoreId				= quotation_customerQuotation_Item.FulfillmentStoreId;
+				ItemObj.Giftcard						= quotation_customerQuotation_Item.Giftcard;
+				ItemObj.GiftcardDeliveryEmail			= quotation_customerQuotation_Item.GiftcardDeliveryEmail;
+				ItemObj.GiftcardDeliveryMessage			= quotation_customerQuotation_Item.GiftcardDeliveryMessage;
+				ItemObj.GiftcardNumber					= quotation_customerQuotation_Item.GiftcardNumber;
+				ItemObj.InventDimensionId				= quotation_customerQuotation_Item.InventDimensionId;
+				ItemObj.InventTransId					= quotation_customerQuotation_Item.InventTransId;
+				ItemObj.InvoiceId						= quotation_customerQuotation_Item.InvoiceId;
+				ItemObj.IsInstallmentEligible			= quotation_customerQuotation_Item.IsInstallmentEligible;
+				ItemObj.ItemId							= quotation_customerQuotation_Item.ItemId;
+				ItemObj.ItemTaxGroup					= quotation_customerQuotation_Item.ItemTaxGroup;
+				ItemObj.LineDscAmount					= quotation_customerQuotation_Item.LineDscAmount;
+				ItemObj.LineManualDiscountAmount		= quotation_customerQuotation_Item.LineManualDiscountAmount;
+				ItemObj.LineManualDiscountPercentage	= quotation_customerQuotation_Item.LineManualDiscountPercentage;
+				ItemObj.LineNumber						= quotation_customerQuotation_Item.LineNumber;
+				ItemObj.LineType						= quotation_customerQuotation_Item.LineType;
+				ItemObj.ListingId						= quotation_customerQuotation_Item.ListingId;
+				ItemObj.NetAmount						= quotation_customerQuotation_Item.NetAmount;
+				ItemObj.ParentInventTransId				= quotation_customerQuotation_Item.ParentInventTransId;
+				ItemObj.PeriodicDiscount				= quotation_customerQuotation_Item.PeriodicDiscount;
+				ItemObj.PeriodicPercentageDiscount		= quotation_customerQuotation_Item.PeriodicPercentageDiscount;
+				ItemObj.Price							= quotation_customerQuotation_Item.Price;
+				ItemObj.Quantity						= quotation_customerQuotation_Item.Quantity;
+				ItemObj.QuantityPicked					= quotation_customerQuotation_Item.QuantityPicked;
+				ItemObj.RecId							= quotation_customerQuotation_Item.RecId;
+				ItemObj.RequestedDeliveryDateString		= quotation_customerQuotation_Item.RequestedDeliveryDateString;
+				ItemObj.ReturnInventTransId				= quotation_customerQuotation_Item.ReturnInventTransId;
+				ItemObj.SalesMarkup						= quotation_customerQuotation_Item.SalesMarkup;
+				ItemObj.SalesTaxGroup					= quotation_customerQuotation_Item.SalesTaxGroup;
+				ItemObj.SerialId						= quotation_customerQuotation_Item.SerialId;
+				ItemObj.SiteId							= quotation_customerQuotation_Item.SiteId;
+				ItemObj.SizeId							= quotation_customerQuotation_Item.SizeId;
+				ItemObj.SizeName						= quotation_customerQuotation_Item.SizeName;
+				ItemObj.SourceId						= quotation_customerQuotation_Item.SourceId;
+				ItemObj.Status							= quotation_customerQuotation_Item.Status;
+				ItemObj.StyleId							= quotation_customerQuotation_Item.StyleId;
+				ItemObj.StyleName						= quotation_customerQuotation_Item.StyleName;
+	    		ItemObj.Taxes							= new Array();
+	    		
+	    		var quotation_customerQuotation_Item_Tax = new Object();
+	    		if(!empty(quotationObj.customerQuotation.Items.Taxes)) {
+			    	for (var o = 0; o < quotationObj.customerQuotation.Items.Taxes.length; o++) {
+			    		quotation_customerQuotation_Item_Tax = quotationObj.customerQuotation.Items.Taxes[o];
+			    		var TaxObj = {
+			    			"Amount"	: quotation_customerQuotation_Item_Tax.Amount,
+							"TaxCode"	: quotation_customerQuotation_Item_Tax.TaxCode
+			    		}
+			    		ItemObj.Taxes.push(TaxObj);
+			    	}
+	    		}
+	    		ItemObj.TotalDiscount		= quotation_customerQuotation_Item.TotalDiscount;
+				ItemObj.TotalPctDiscount	= quotation_customerQuotation_Item.TotalPctDiscount;
+				ItemObj.Unit				= quotation_customerQuotation_Item.Unit;
+				ItemObj.UpSellOrigin		= quotation_customerQuotation_Item.UpSellOrigin;
+				ItemObj.UpSellOriginOfferId	= quotation_customerQuotation_Item.UpSellOriginOfferId;
+				ItemObj.VariantId			= quotation_customerQuotation_Item.VariantId;
+				ItemObj.WarehouseId			= quotation_customerQuotation_Item.WarehouseId;
+	    		
+	    		QUOTATION_OBJECT.customerQuotation.Items.push(ItemObj);
+	    	}
+	    }	// END IF : quotationObj.customerQuotation.Items
+		QUOTATION_OBJECT.customerQuotation.LocalHourOfDay			= quotationObj.customerQuotation.LocalHourOfDay;
+		QUOTATION_OBJECT.customerQuotation.LoyaltyCardId			= quotationObj.customerQuotation.LoyaltyCardId;
+		QUOTATION_OBJECT.customerQuotation.OrderType				= quotationObj.customerQuotation.OrderType;
+		QUOTATION_OBJECT.customerQuotation.OriginalTransactionTime	= quotationObj.customerQuotation.OriginalTransactionTime;
+		QUOTATION_OBJECT.customerQuotation.OutOfBalanceReleaseType	= quotationObj.customerQuotation.OutOfBalanceReleaseType;
+		QUOTATION_OBJECT.customerQuotation.PaymentOutOfBalanceType	= quotationObj.customerQuotation.PaymentOutOfBalanceType;
+		QUOTATION_OBJECT.customerQuotation.Payments					= new Array();
+		
+		var quotation_customerQuotation_Payment = new Object();
+	    if(!empty(quotationObj.customerQuotation.Payments)) {
+	    	for (var p = 0; p < quotationObj.customerQuotation.Payments.length; p++) {
+	    		quotation_customerQuotation_Payment = quotationObj.customerQuotation.Payments[p];
+	    		var PaymentsObj = {
+	    			"Amount"					: quotationObj.customerQuotation.Amount,
+					"CardType"					: quotationObj.customerQuotation.CardType,
+					"CreditCardAuthorization"	: quotationObj.customerQuotation.CreditCardAuthorization,
+					"CreditCardToken"			: quotationObj.customerQuotation.CreditCardToken,
+					"Currency"					: quotationObj.customerQuotation.Currency,
+					"DateString"				: quotationObj.customerQuotation.DateString,
+					"PaymentCaptured"			: quotationObj.customerQuotation.PaymentCaptured,
+					"PaymentType"				: quotationObj.customerQuotation.PaymentType,
+					"Prepayment"				: quotationObj.customerQuotation.Prepayment
+	    		}
+	    		QUOTATION_OBJECT.customerQuotation.Payments.push(PaymentsObj);
+	    	}
+		}
+		QUOTATION_OBJECT.customerQuotation.Preauthorization = {
+			"PaymentPropertiesBlob"	: quotationObj.customerQuotation.Preauthorization.PaymentPropertiesBlob
+		};
+		QUOTATION_OBJECT.customerQuotation.PrepaymentAmountApplied		= quotationObj.customerQuotation.PrepaymentAmountApplied;
+		QUOTATION_OBJECT.customerQuotation.PrepaymentAmountOverridden	= quotationObj.customerQuotation.PrepaymentAmountOverridden;
+		QUOTATION_OBJECT.customerQuotation.PreviouslyInvoicedAmount		= quotationObj.customerQuotation.PreviouslyInvoicedAmount;
+		QUOTATION_OBJECT.customerQuotation.QuotationId					= quotationObj.customerQuotation.QuotationId;
+		QUOTATION_OBJECT.customerQuotation.RequestedDeliveryDateString	= quotationObj.customerQuotation.RequestedDeliveryDateString;
+		QUOTATION_OBJECT.customerQuotation.ReturnReasonCodeId			= quotationObj.customerQuotation.ReturnReasonCodeId;
+		QUOTATION_OBJECT.customerQuotation.RoundingDifference			= quotationObj.customerQuotation.RoundingDifference;
+		QUOTATION_OBJECT.customerQuotation.SalespersonName				= quotationObj.customerQuotation.SalespersonName;
+		QUOTATION_OBJECT.customerQuotation.SalespersonStaffId			= quotationObj.customerQuotation.SalespersonStaffId;
+		QUOTATION_OBJECT.customerQuotation.SiteId						= quotationObj.customerQuotation.SiteId;
+		QUOTATION_OBJECT.customerQuotation.SourceId						= quotationObj.customerQuotation.SourceId;
+		QUOTATION_OBJECT.customerQuotation.Status						= quotationObj.customerQuotation.Status;
+		QUOTATION_OBJECT.customerQuotation.StoreId						= quotationObj.customerQuotation.StoreId;
+		QUOTATION_OBJECT.customerQuotation.Taxes						= new Array();
+		
+		var quotation_customerQuotation_Tax = new Object();
+		if(!empty(quotationObj.customerQuotation.Taxes)) {
+	    	for (var q = 0; q < quotationObj.customerQuotation.Taxes.length; q++) {
+	    		quotation_customerQuotation_Tax = quotationObj.customerQuotation.Taxes[q];
+	    		var TaxObj = {
+	    			"Amount"	: quotation_customerQuotation_Tax.Amount,
+					"TaxCode"	: quotation_customerQuotation_Tax.TaxCode
+	    		}
+	    		QUOTATION_OBJECT.customerQuotation.Taxes.push(TaxObj);
+	    	}
+		}
+		QUOTATION_OBJECT.customerQuotation.TerminalId						= quotationObj.customerQuotation.TerminalId;
+		QUOTATION_OBJECT.customerQuotation.TotalManualDiscountAmount		= quotationObj.customerQuotation.TotalManualDiscountAmount;
+		QUOTATION_OBJECT.customerQuotation.TotalManualDiscountPercentage	= quotationObj.customerQuotation.TotalManualDiscountPercentage;
+		QUOTATION_OBJECT.customerQuotation.TransactionId					= quotationObj.customerQuotation.TransactionId;
+		QUOTATION_OBJECT.customerQuotation.WarehouseId						= quotationObj.customerQuotation.WarehouseId;
+		
+		QUOTATION_OBJECT.IsEcomCustomerId	= quotationObj.IsEcomCustomerId;
+
+		//Creating JSON Object
+		var requestObject = JSON.stringify(QUOTATION_OBJECT);
+		
+		return requestObject;
+	},
+
+	/*
+	* Builds JSON request packet for getting Quotation from AX
+	*/
+	buildGetQuotationRequestObject : function(args) {
+		var QUOTATION_OBJECT = {
+			quotationId : args.quotationId
+		};
+
+		//Creating JSON Object
+		var requestObject = JSON.stringify(QUOTATION_OBJECT);
+		
+		return requestObject;
+	}
+}
+
+module.exports=__QuotationFactory;

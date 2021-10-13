@@ -1,0 +1,332 @@
+/**
+*	Name: OrderFactory
+*	Description:
+*		This script creates a factory object builds the requestDataContainer Objects for all the radial Order Create service calls
+*/
+var dwsvc		= require ("dw/svc");
+var dworder		= require ("dw/order");
+var dwcustomer	= require ("dw/customer");
+var dwnet		= require ("dw/net");
+var dwsystem	= require ("dw/system");
+var dwvalue		= require ("dw/value");
+var dwutil		= require ("dw/util");
+
+var CommerceLinkFactory = require('~/cartridge/scripts/utils/CommerceLinkFactory');
+
+var __OrderFactory : Object = {	
+	// Public Methods
+	
+	/**
+	* Builds JSON request packet for creating new Order
+	*/
+	buildCreateOrderRequestObject : function(args) {
+		var orderObj = args.order;
+		var orders = new Object();
+		var order = new Object();
+		var customer = new Object();
+		var billingAddress = new Object();
+		var status = new Object();
+		
+		order["@order-no"] = orderObj.orderNo;
+		order["order-date"] = orderObj.creationDate;
+		order["created-by"] = orderObj.createdBy;
+		order["original-order-no"] = orderObj.originalOrderNo;
+		order["currency"] = orderObj.currencyCode;
+		order["customer-locale"] = orderObj.customerLocaleID;
+		order["taxation"] = "net";
+		order["invoice-no"] = orderObj.invoiceNo;
+		order["current-order-no"] = orderObj.currentOrderNo;
+		
+		customer["customer-no"] = orderObj.customerNo;
+		customer["customer-name"] = orderObj.customerName;
+		customer["customer-email"] = orderObj.customerEmail;
+		
+		if (!empty(orderObj.billingAddress)) {
+			billingAddress["first-name"] = orderObj.billingAddress.firstName;
+			billingAddress["last-name"] = orderObj.billingAddress.lastName;
+			billingAddress["address1"] = orderObj.billingAddress.address1;
+			billingAddress["city"] = orderObj.billingAddress.city;
+			billingAddress["postal-code"] = orderObj.billingAddress.postalCode;
+			billingAddress["state-code"] = orderObj.billingAddress.stateCode;
+			billingAddress["country-code"] = orderObj.billingAddress.countryCode.value;
+			billingAddress["phone"] = orderObj.billingAddress.phone;
+		}
+		
+		status["order-status"] = orderObj.status ? orderObj.status.displayValue : '';
+		status["shipping-status"] = orderObj.shippingStatus ? orderObj.shippingStatus.displayValue : '';
+		status["confirmation-status"] = orderObj.confirmationStatus ? orderObj.confirmationStatus.displayValue : '';
+		status["payment-status"] = orderObj.paymentStatus ? orderObj.paymentStatus.displayValue : '';
+		
+		if(!empty(orderObj.productLineItems)){
+			var productLineItems = new Object();
+			var productLineItemArray = [];
+			var i;
+			for (i = 0; i < orderObj.productLineItems.length; i++){
+				   var productLineItem = new Object();
+				   var item = orderObj.productLineItems[i];
+				   productLineItem["net-price"] = item.netPrice.value.toFixed(2).toString();
+				   productLineItem["tax"] = item.tax.value.toFixed(2).toString() ;
+				   productLineItem["gross-price"] = item.grossPrice.value.toFixed(2).toString();
+				   productLineItem["base-price"] = item.basePrice.value.toFixed(2).toString();
+				   productLineItem["lineitem-text"] = item.lineItemText;
+				   productLineItem["tax-basis"] = item.taxBasis.value.toFixed(2).toString();
+				   productLineItem["position"] = item.position.toString();
+				   productLineItem["product-id"] = item.productID;
+				   productLineItem["product-name"] = item.productName;
+				   
+				   var quantity  = new Object;
+				   quantity["@unit"] = item.quantity.unit;
+				   quantity["#text"] = item.quantity.value.toFixed(1).toString();
+				   productLineItem.quantity = quantity;
+				   
+				   productLineItem["tax-rate"] = item.taxRate.toString();
+				   productLineItem["shipment-id"] = item.shipment.shipmentNo;
+				 /*  var optionLineItem = new Object();
+				   var optionLineItems = new Object();
+				   if(!empty(item.optionProductLineItems)){
+						var j;
+						for (j = 0; j < item.optionProductLineItems.length; j++){
+							   var optionItem = item.optionProductLineItems[j];
+							   optionLineItem["net-price"] = optionItem.netPrice.value;
+							   optionLineItem["tax"] = optionItem.tax.value;
+							   optionLineItem["gross-price"] = optionItem.grossPrice.value;
+							   optionLineItem["base-price"] = optionItem.basePrice.value;
+							   optionLineItem["lineitem-text"] = optionItem.lineItemText;
+							   optionLineItem["tax-basis"] = optionItem.taxBasis.value;
+							   optionLineItem["option-id"] = optionItem.optionID;
+							   optionLineItem["value-id"] = optionItem.optionValueID;
+							   optionLineItem["product-id"] = optionItem.productID;
+							   var customAttributes = new Object();
+							   var arr=[];
+							   for(var prop in optionItem.custom){
+								   var CustomAttribute = new Object();
+								   CustomAttribute["attribute-id"] = prop;
+								   CustomAttribute["text"] = optionItem.custom[prop];
+								   arr.push(CustomAttribute);
+							   }
+							   optionLineItem["custom-attributes"] = customAttributes;
+							   optionLineItem["custom-attributes"]["custom-attribute"] = arr;
+						}
+				   }*/
+				   productLineItem["gift"] = item.gift.toString();
+				   var productCustomAttributes = new Object();
+				   var productsArr=[];
+				   for(var prop in orderObj.productLineItems[i].custom){
+					   var productCustomAttribute = new Object();
+					   productCustomAttribute["@attribute-id"] = prop;
+					   productCustomAttribute["#text"] = orderObj.productLineItems[i].custom[prop];
+					   productsArr.push(productCustomAttribute);
+					   
+				   }
+				   productLineItem["custom-attributes"] = productCustomAttributes;
+				   productLineItem["custom-attributes"]["custom-attribute"]  = productsArr;
+				   var priceAdjustments = new Object();
+				   if(!empty(item.priceAdjustments)){
+						var k;
+						var priceAdjustment = new Object();
+						for (k = 0; k < item.priceAdjustments.length; k++){
+							var priceItem = item.priceAdjustments[k];
+							priceAdjustment["net-price"] = priceItem.netPrice.value.toFixed(2).toString();
+							priceAdjustment["tax"] = priceItem.tax.value.toFixed(2).toString();
+							priceAdjustment["gross-price"] = priceItem.grossPrice.value.toFixed(2).toString();
+							priceAdjustment["base-price"] = priceItem.basePrice.value.toFixed(2).toString();
+							priceAdjustment["lineitem-text"] = priceItem.lineItemText;
+							priceAdjustment["tax-basis"] = priceItem.taxBasis.value.toFixed(2).toString();
+							priceAdjustment["promotion-id"] = priceItem.promotionID;
+							priceAdjustment["campaign-id"] = priceItem.campaignID;
+							priceAdjustment["coupon-id"] = ('couponLineItems' in orderObj && 
+															orderObj.couponLineItems.length && 
+															'couponCode' in orderObj.couponLineItems[0])
+															? orderObj.couponLineItems[0].couponCode : '';
+							productLineItem["price-adjustments"] = priceAdjustments;
+							productLineItem["price-adjustments"]["price-adjustment"] = priceAdjustment;
+						}
+				   }
+				   productLineItemArray.push(productLineItem);
+			}
+		}
+		
+		if(!empty(orderObj.shipments)){
+			var shippingLineItems = new Object();
+			var shippingLineItemsArray = [];
+			for(var j in orderObj.shipments ){
+				if(!empty(orderObj.shipments[j].shippingLineItems)){
+					var i;
+					var shippingLineItem = new Object();
+					for (i = 0; i < orderObj.shipments[j].shippingLineItems.length; i++){
+						var item = orderObj.shipments[j].shippingLineItems[i];
+						shippingLineItem["net-price"]= item.netPrice.value.toFixed(2).toString();
+						shippingLineItem["tax"]= item.tax.value.toFixed(2).toString();
+						shippingLineItem["gross-price"]= item.grossPrice.value.toFixed(2).toString();
+						shippingLineItem["base-price"]= item.basePrice.value.toFixed(2).toString();
+						shippingLineItem["lineitem-text"]= item.lineItemText;
+						shippingLineItem["tax-basis"]= item.taxBasis.value.toFixed(2).toString();
+						shippingLineItem["item-id"]= item.ID ? item.ID : '';
+						shippingLineItem["shipment-id"]= orderObj.shipments[j].shipmentNo;
+						shippingLineItem["tax-rate"]= item.taxRate.toString();
+						shippingLineItemsArray.push(shippingLineItem);
+					}
+					
+				}
+			}
+		}
+		
+		var shipments = new Object();
+		var shipmentArray = [];
+		if(!empty(orderObj.shipments)){
+			for(var data in orderObj.shipments){
+				var item = orderObj.shipments[data];
+				var shipment = new Object();
+				var shipmentStatus = new Object();
+				var shippingAddress = new Object();
+				shipment["@shipment-id"] = item.shipmentNo;
+				shipmentStatus["shipping-status"] = item.shippingStatus.displayValue;
+				shipment["shipping-method"] = item.shippingMethodID;
+				if(item.shippingAddress.firstName!=null)	shippingAddress["first-name"] = item.shippingAddress.firstName;
+				shippingAddress["last-name"] = item.shippingAddress.lastName;
+				shippingAddress["address1"] = item.shippingAddress.address1;
+				shippingAddress["city"] = item.shippingAddress.city;
+				shippingAddress["postal-code"] = item.shippingAddress.postalCode;
+				shippingAddress["state-code"] = item.shippingAddress.stateCode;
+				shippingAddress["country-code"] = item.shippingAddress.countryCode.value;
+				if(item.shippingAddress.phone!=null)	shippingAddress["phone"] = item.shippingAddress.phone;
+				shipment["gift"] = item.gift.toString();
+				shipment["status"] = shipmentStatus;
+				shipment["shipping-address"] = shippingAddress;
+				var totals = new Object();
+				var merchandizeTotal =  new Object();
+				merchandizeTotal["net-price"] = item.merchandizeTotalNetPrice.value.toFixed(2).toString() ;
+				merchandizeTotal["tax"] = item.merchandizeTotalTax.value.toFixed(2).toString(); 
+				merchandizeTotal["gross-price"] = item.merchandizeTotalGrossPrice.value.toFixed(2).toString() ; 
+				var adjustedMerchandizeTotal = new Object();
+				adjustedMerchandizeTotal["net-price"] = item.adjustedMerchandizeTotalNetPrice.value.toFixed(2).toString();
+				adjustedMerchandizeTotal["tax"] = item.adjustedMerchandizeTotalTax.value.toFixed(2).toString();
+				adjustedMerchandizeTotal["gross-price"] = item.adjustedMerchandizeTotalGrossPrice.value.toFixed(2).toString();
+				var shippingTotal = new Object();
+				shippingTotal["net-price"] = item.shippingTotalNetPrice.value.toFixed(2).toString();
+				shippingTotal["tax"] = item.shippingTotalTax.value.toFixed(2).toString();
+				shippingTotal["gross-price"] = item.shippingTotalGrossPrice.value.toFixed(2).toString();
+				var adjustedShippingTotal = new Object();
+				adjustedShippingTotal["net-price"] = item.adjustedShippingTotalNetPrice.value.toFixed(2).toString();
+				adjustedShippingTotal["tax"] = item.adjustedShippingTotalTax.value.toFixed(2).toString();
+				adjustedShippingTotal["gross-price"] = item.adjustedShippingTotalGrossPrice.value.toFixed(2).toString();
+				
+				var shipmentTotal = new Object();
+				shipmentTotal["net-price"] = item.totalNetPrice.value.toFixed(2).toString();
+				shipmentTotal["tax"] = item.totalTax.value.toFixed(2).toString();
+				shipmentTotal["gross-price"] = item.totalGrossPrice.value.toFixed(2).toString();
+				
+				shipment.totals = totals;
+				shipment.totals["merchandize-total"] = merchandizeTotal;
+				shipment.totals["adjusted-merchandize-total"] = adjustedMerchandizeTotal;
+				shipment.totals["shipping-total"] = shippingTotal;
+				shipment.totals["adjusted-shipping-total"] = adjustedShippingTotal;
+				shipment.totals["shipment-total"] = shipmentTotal;
+				var shipmentCustomAttributes = new Object();
+				var arr=[];
+				for(var prop in item.custom){
+					var shipmentCustomAttribute = new Object();
+					shipmentCustomAttribute["@attribute-id"] = prop;
+					shipmentCustomAttribute["@text"] = item.custom[prop];
+					arr.push(shipmentCustomAttribute);
+				}
+				shipment["custom-attributes"] = shipmentCustomAttributes;
+				shipment["custom-attributes"]["custom-attribute"] = arr;
+				shipmentArray.push(shipment);
+			}
+		}
+		
+		shipments.shipment = shipmentArray;
+		var totals = new Object();
+		var merchandizeTotal =  new Object();
+		merchandizeTotal["net-price"] = orderObj.merchandizeTotalNetPrice.value.toFixed(2).toString() ;
+		merchandizeTotal["tax"] = orderObj.merchandizeTotalTax.value.toFixed(2).toString() ; 
+		merchandizeTotal["gross-price"] = orderObj.merchandizeTotalGrossPrice.value.toFixed(2).toString() ; 
+		var adjustedMerchandizeTotal = new Object();
+		adjustedMerchandizeTotal["net-price"] = orderObj.adjustedMerchandizeTotalNetPrice.value.toFixed(2).toString();
+		adjustedMerchandizeTotal["tax"] = orderObj.adjustedMerchandizeTotalTax.value.toFixed(2).toString();
+		adjustedMerchandizeTotal["gross-price"] = orderObj.adjustedMerchandizeTotalGrossPrice.value.toFixed(2).toString();
+		var shippingTotal = new Object();
+		shippingTotal["net-price"] = orderObj.shippingTotalNetPrice.value.toFixed(2).toString();
+		shippingTotal["tax"] = orderObj.shippingTotalTax.value.toFixed(2).toString();
+		shippingTotal["gross-price"] = orderObj.shippingTotalGrossPrice.value.toFixed(2).toString();
+		var adjustedShippingTotal = new Object();
+		adjustedShippingTotal["net-price"] = orderObj.adjustedShippingTotalNetPrice.value.toFixed(2).toString();
+		adjustedShippingTotal["tax"] = orderObj.adjustedShippingTotalTax.value.toFixed(2).toString();
+		adjustedShippingTotal["gross-price"] = orderObj.adjustedShippingTotalGrossPrice.value.toFixed(2).toString();
+	
+		var orderTotal = new Object();
+		orderTotal["net-price"] = orderObj.totalNetPrice.value.toFixed(2).toString();
+		orderTotal["tax"] = orderObj.totalTax.value.toFixed(2).toString();
+		orderTotal["gross-price"] = orderObj.totalGrossPrice.value.toFixed(2).toString();
+		
+		var payments = new Object();
+		var payment = new Object();
+		var creditCard = new Object();
+		if (!empty(orderObj.paymentInstrument)) {
+			creditCard["card-type"] = orderObj.paymentInstrument.creditCardType;
+			creditCard["card-number"] = orderObj.paymentInstrument.creditCardNumber;
+			creditCard["card-holder"] = orderObj.paymentInstrument.creditCardHolder;
+			creditCard["expiration-month"] = orderObj.paymentInstrument.creditCardExpirationMonth;
+			creditCard["expiration-year"] = orderObj.paymentInstrument.creditCardExpirationYear;
+			payment["credit-card"] = creditCard;
+			if (!empty(orderObj.paymentInstrument.paymentTransaction)) {
+				payment["amount"] = orderObj.paymentInstrument.paymentTransaction.amount ? orderObj.paymentInstrument.paymentTransaction.amount.value : '';
+				payment["processor-id"] = orderObj.paymentInstrument.paymentTransaction.paymentProcessor ? orderObj.paymentInstrument.paymentTransaction.paymentProcessor.ID : '';
+				payment["transaction-id"] = orderObj.paymentInstrument.paymentTransaction.transactionID;
+			}
+		}
+		var paymentCustomAttributes = new Object();
+		var arr=[];
+		for(var prop in orderObj.paymentInstrument.paymentTransaction.custom){
+			var paymentCustomAttribute = new Object();
+			paymentCustomAttribute["@attribute-id"] = prop;
+			paymentCustomAttribute["#text"] = orderObj.paymentInstrument.paymentTransaction.custom[prop];
+			arr.push(paymentCustomAttribute);
+		}
+		
+		payment["custom-attributes"] = paymentCustomAttributes;
+		payment["custom-attributes"]["custom-attribute"] = arr;
+		var orderCustomAttributes = new Object();
+		var arr1=[];
+		for(var data1 in orderObj.custom){
+			var orderCustomAttribute = new Object();
+			orderCustomAttribute["@attribute-id"] = data1;
+			orderCustomAttribute["#text"] = orderObj.custom[data1];
+			arr1.push(orderCustomAttribute);
+		}
+		
+		orders.order = order;
+		orders.order.customer = customer;
+		orders.order.customer["billing-address"] = billingAddress;
+		orders.order.status = status;
+		orders.order["product-lineitems"] = productLineItems;
+		if (orders.order["product-lineitems"]) {
+			orders.order["product-lineitems"]["product-lineitem"] = productLineItemArray;
+		}
+		orders.order["shipping-lineitems"] = shippingLineItems;
+		orders.order["shipping-lineitems"]["shipping-lineitem"] = shippingLineItemsArray;
+		//orders.order["product-lineitems"]["product-lineitem"]["option-lineitems"] = optionLineItems;
+		//orders.order["product-lineitems"]["product-lineitem"]["option-lineitems"]["option-lineitem"]  = optionLineItem;
+		orders.order.shipments = shipments;
+		orders.order.totals = totals;
+		orders.order.totals["merchandize-total"] = merchandizeTotal;
+		orders.order.totals["adjusted-merchandize-total"] = adjustedMerchandizeTotal;
+		orders.order.totals["shipping-total"] = shippingTotal;
+		orders.order.totals["adjusted-shipping-total"] = adjustedShippingTotal;
+		orders.order.totals["order-total"] = orderTotal;
+		orders.order.payments = payments;
+		orders.order.payments.payment = payment;
+		orders.order["remoteHost"] = orderObj.remoteHost;
+		orders.order["custom-attributes"] = orderCustomAttributes;
+		orders.order["custom-attributes"]["custom-attribute"] = arr1;
+		
+		var requestObject = JSON.stringify(orders);
+		var requestStr = "{'salesOrderJSON':'" + requestObject + "'}";
+				
+		return requestStr;
+	}
+}
+
+
+module.exports=__OrderFactory;

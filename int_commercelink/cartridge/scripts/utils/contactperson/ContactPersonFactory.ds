@@ -1,0 +1,87 @@
+/**
+*	Name: ContactPersonFactory
+*	Description:
+*		This script creates a factory object builds the requestDataContainer Objects for all the radial Wishlist Create service calls
+*/
+var dwsvc		= require ("dw/svc");
+var dwnet		= require ("dw/net");
+var dwsystem	= require ("dw/system");
+var dwvalue		= require ("dw/value");
+var dwutil		= require ("dw/util");
+
+var CommerceLinkFactory = require ("~/cartridge/scripts/utils/CommerceLink");
+
+var __CreateContactPersonFactory : Object = {
+	// Public Methods
+	
+	/**
+	* Builds JSON request packet for creating new Contact Person
+	*/
+	buildCreateContactPersonRequestObject : function(args) {
+		var contactPersontObj = args.contactPerson;
+		var CONTACT_PERSON_OBJECT = {
+			"DirPartyRecordId"	: contactPersontObj.DirPartyRecordId,
+			"ContactPersonId"	: contactPersontObj.ContactPersonId,
+			"ContactForParty"	: contactPersontObj.ContactForParty,
+			"CustAccount"		: contactPersontObj.CustAccount,
+			"InActive"			: contactPersontObj.InActive,
+			"Title"				: contactPersontObj.Title,
+			"FirstName"			: contactPersontObj.FirstName,
+			"MiddleName"		: contactPersontObj.MiddleName,
+			"LastName"			: contactPersontObj.LastName,
+			"EmailRecordId"		: contactPersontObj.EmailRecordId,
+			"Email"				: contactPersontObj.Email,
+			"PhoneRecordId"		: contactPersontObj.PhoneRecordId,
+			"Phone"				: contactPersontObj.Phone
+		}
+		
+		//Creating JSON Object
+		var requestObject = JSON.stringify(CONTACT_PERSON_OBJECT);
+		
+		return requestObject;
+	},
+	
+	/**
+	* Builds JSON request packet for updating Contact Person
+	*/
+	buildUpdateContactPersonRequestObject : function(args) {
+		var contactPersontObj = args.contactPerson;
+		var CONTACT_PERSON_OBJECT = {
+			"DirPartyRecordId"	: contactPersontObj.DirPartyRecordId,
+			"ContactPersonId"	: contactPersontObj.ContactPersonId,
+			"ContactForParty"	: contactPersontObj.ContactForParty,
+			"CustAccount"		: contactPersontObj.CustAccount,
+			"InActive"			: contactPersontObj.InActive,
+			"Title"				: contactPersontObj.Title,
+			"FirstName"			: contactPersontObj.FirstName,
+			"MiddleName"		: contactPersontObj.MiddleName,
+			"LastName"			: contactPersontObj.LastName,
+			"EmailRecordId"		: contactPersontObj.EmailRecordId,
+			"Email"				: contactPersontObj.Email,
+			"PhoneRecordId"		: contactPersontObj.PhoneRecordId,
+			"Phone"				: contactPersontObj.Phone
+		}
+		
+		//Creating JSON Object
+		var requestObject = JSON.stringify(CONTACT_PERSON_OBJECT);
+		
+		return requestObject;
+	},
+	
+	/*
+	* Builds JSON request packet for getting contact person from AX
+	*/
+	buildGetContactPersonRequestObject : function(args) {
+		var CONCTACT_PERSON_OBJECT = {
+			customerAccount : args.customerAccount
+		};
+
+		//Creating JSON Object
+		var requestObject = JSON.stringify(CONCTACT_PERSON_OBJECT);
+		
+		return requestObject;
+	},
+	
+}
+
+module.exports=__ContactPersonFactory;

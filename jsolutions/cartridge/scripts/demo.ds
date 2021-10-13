@@ -1,0 +1,21 @@
+/**
+*   @input inputID : String 
+*   @output outProduct : dw.catalog.Product
+*
+*/
+importPackage( dw.system );
+importPackage(dw.catalog);
+
+function execute( args : PipelineDictionary ) : Number
+{
+     args.outProduct:Product = ProductMgr.getProduct(args.inputID);
+     if(args.outProduct==null){
+     	   trace('Product with id {0} not found',args.inputID);
+     	   return PIPELET_ERROR;
+     }
+     else{	   
+
+      return PIPELET_NEXT;
+   
+     }
+}
